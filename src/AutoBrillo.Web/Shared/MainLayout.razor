@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+@inject ServicioAutenticacion Autenticacion
+@inject NavigationManager Navegacion
+
+<div class="pagina">
+    <header class="barra-superior">
+        <a class="marca" href="inicio">Auto<span>Brillo</span></a>
+        @if (!string.IsNullOrWhiteSpace(usuario))
+        {
+            <div class="sesion"><span>Hola, @usuario</span><button @onclick="Salir">Salir</button></div>
+        }
+    </header>
+    <main class="contenido">@Body</main>
+</div>
+
+@code {
+    private string? usuario;
+
+    protected override async Task OnInitializedAsync() => usuario = await Autenticacion.ObtenerUsuarioAsync();
+
+    private async Task Salir()
+    {
+        await Autenticacion.CerrarSesionAsync();
+        Navegacion.NavigateTo("login", forceLoad: true);
+    }
+}

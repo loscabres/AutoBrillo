@@ -1,0 +1,36 @@
+@page "/"
+@page "/login"
+@inject ServicioAutenticacion Autenticacion
+@inject NavigationManager Navegacion
+
+<PageTitle>Acceso | AutoBrillo</PageTitle>
+
+<section class="tarjeta-acceso">
+    <p class="etiqueta">LAVADO PROFESIONAL</p>
+    <h1>Tu auto merece brillar.</h1>
+    <p>Ingresa para administrar AutoBrillo.</p>
+    <EditForm Model="credenciales" OnValidSubmit="Ingresar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Usuario <InputText @bind-Value="credenciales.Nombre" /></label>
+        <label>Contraseña <InputText @bind-Value="credenciales.Password" type="password" /></label>
+        @if (error is not null) { <p class="error">@error</p> }
+        <button class="boton-principal" disabled="@enviando">@(enviando ? "Ingresando..." : "Ingresar")</button>
+    </EditForm>
+</section>
+
+@code {
+    private readonly Credenciales credenciales = new();
+    private string? error;
+    private bool enviando;
+
+    private async Task Ingresar()
+    {
+        enviando = true;
+        error = await Autenticacion.LoginAsync(credenciales.Nombre, credenciales.Password);
+        enviando = false;
+        if (error is null) Navegacion.NavigateTo("inicio", forceLoad: true);
+    }
+
+    private class Credenciales { public string Nombre { get; set; } = ""; public string Password { get; set; } = ""; }
+}

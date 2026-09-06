@@ -1,0 +1,33 @@
+@page "/inicio"
+@inject ServicioAutenticacion Autenticacion
+@inject NavigationManager Navegacion
+
+<PageTitle>Inicio | AutoBrillo</PageTitle>
+
+@if (cargando)
+{
+    <p>Comprobando tu sesión...</p>
+}
+else
+{
+    <section class="hero">
+        <p class="etiqueta">PANEL PRINCIPAL</p>
+        <h1>AutoBrillo listo para trabajar.</h1>
+        <p>Gestiona tu lavadero desde un solo lugar.</p>
+        <div class="indicador"><strong>●</strong> Sistema operativo</div>
+    </section>
+}
+
+@code {
+    private bool cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await Autenticacion.ValidarSesionAsync())
+        {
+            Navegacion.NavigateTo("login", forceLoad: true);
+            return;
+        }
+        cargando = false;
+    }
+}
