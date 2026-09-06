@@ -102,6 +102,7 @@ La URL local se muestra en la consola de .NET.
 - [Arquitectura y estructura de carpetas](docs/arquitectura.md)
 - [Referencia de la API](docs/api.md)
 - [Despliegue y configuración](docs/despliegue.md)
+- [Guía para exposición y ejemplos del código](docs/guia-para-exposicion.md)
 
 ## Seguridad de configuración
 

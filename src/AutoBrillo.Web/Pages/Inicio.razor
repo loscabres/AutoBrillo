@@ -4,12 +4,14 @@
 
 <PageTitle>Inicio | AutoBrillo</PageTitle>
 
+@* La vista espera mientras Inicio.razor.cs comprueba el token con la API. *@
 @if (cargando)
 {
     <p>Comprobando tu sesión...</p>
 }
 else
 {
+    @* Este bloque se muestra únicamente cuando la sesión fue validada. *@
     <section class="hero">
         <p class="etiqueta">PANEL PRINCIPAL</p>
         <h1>AutoBrillo listo para trabajar.</h1>

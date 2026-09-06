@@ -11,33 +11,65 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoBrillo.Api.Controllers;
 
+/// <summary>
+/// Atiende las acciones relacionadas con el acceso de usuarios.
+/// Su ruta base es /api/auth. El controlador recibe Repository y PasswordHasher por inyección de dependencias.
+/// </summary>
 [ApiController]
 [Route("api/auth")]
 public class AuthController(IUserRepository usuarios, PasswordHasher passwordHasher, IConfiguration configuracion) : ControllerBase
 {
+    /// <summary>
+    /// Crea un usuario nuevo.
+    /// Ejemplo de solicitud: { "nombre": "ana", "password": "clave123" }.
+    /// </summary>
+    /// <returns>
+    /// 201 con Id_Usuarios y Nombre si se registró; 409 si el nombre ya estaba usado.
+    /// </returns>
     [HttpPost("register")]
     public async Task<IActionResult> Registro(CredencialesRequest request, CancellationToken cancellationToken)
     {
+        // Trim elimina espacios involuntarios al inicio y al final del nombre.
         var nombre = request.Nombre.Trim();
+
+        // Antes de guardar, comprobamos que no exista otro usuario con el mismo Nombre.
         if (await usuarios.ExisteNombreAsync(nombre, cancellationToken))
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
 
+        // PasswordHasher convierte la contraseña a BCrypt antes de crear el objeto Usuario.
         var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password) };
+
+        // Se agrega el objeto y después se confirma el INSERT en PostgreSQL.
         await usuarios.AgregarAsync(usuario, cancellationToken);
         await usuarios.GuardarCambiosAsync(cancellationToken);
+
+        // Solo devolvemos los datos seguros que la web necesita; nunca Password ni su hash.
         return CreatedAtAction(nameof(Me), new { }, new { usuario.Id_Usuarios, usuario.Nombre });
     }
 
+    /// <summary>
+    /// Comprueba las credenciales y devuelve un JWT para mantener la sesión.
+    /// Ejemplo de solicitud: { "nombre": "ana", "password": "clave123" }.
+    /// </summary>
+    /// <returns>200 con token y usuario; 401 cuando el nombre o la contraseña no coinciden.</returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login(CredencialesRequest request, CancellationToken cancellationToken)
     {
+        // Busca primero al usuario por Nombre.
         var usuario = await usuarios.ObtenerPorNombreAsync(request.Nombre.Trim(), cancellationToken);
+
+        // Si no existe o BCrypt no valida la contraseña, no se revela cuál de los dos datos falló.
         if (usuario is null || !passwordHasher.Verificar(request.Password, usuario.Password))
             return Unauthorized(new { mensaje = "Nombre o contraseña incorrectos." });
 
+        // El token permite acceder posteriormente a endpoints marcados con [Authorize].
         return Ok(new { token = CrearToken(usuario), usuario = usuario.Nombre });
     }
 
+    /// <summary>
+    /// Devuelve el identificador y nombre del usuario que envió un JWT válido.
+    /// [Authorize] hace que ASP.NET Core rechace automáticamente solicitudes sin token válido.
+    /// </summary>
     [Authorize]
     [HttpGet("me")]
     public IActionResult Me() => Ok(new
@@ -46,17 +78,24 @@ public class AuthController(IUserRepository usuarios, PasswordHasher passwordHas
         usuario = User.Identity?.Name
     });
 
+    /// <summary>
+    /// Crea un JWT firmado con datos mínimos: identificador y nombre del usuario.
+    /// El token dura 8 horas y se firma con JWT_SECRET, que viene de las variables de entorno.
+    /// </summary>
     private string CrearToken(Usuario usuario)
     {
         var clave = configuracion["JWT_SECRET"] ?? throw new InvalidOperationException("Falta la variable de entorno JWT_SECRET.");
         var issuer = configuracion["JWT_ISSUER"] ?? "AutoBrillo.Api";
         var audience = configuracion["JWT_AUDIENCE"] ?? "AutoBrillo.Web";
+
+        // HMAC SHA-256 firma el token para que no pueda ser modificado por el navegador.
         var credenciales = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clave)), SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id_Usuarios.ToString()),
             new Claim(ClaimTypes.Name, usuario.Nombre)
         };
+
         var token = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.UtcNow.AddHours(8), signingCredentials: credenciales);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

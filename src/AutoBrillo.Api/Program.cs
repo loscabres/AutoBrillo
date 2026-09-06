@@ -6,14 +6,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+// Punto de entrada de la API ASP.NET Core.
 var builder = WebApplication.CreateBuilder(args);
 
-// Vercel Services indica el puerto mediante PORT; localmente ASP.NET usa el habitual.
+// El hosting puede indicar el puerto con PORT. Docker usa esta variable para escuchar en 8080.
 var puerto = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(puerto))
     builder.WebHost.UseUrls($"http://0.0.0.0:{puerto}");
 
-// Las credenciales se leen de variables de entorno, no del código fuente.
+// La configuración sensible se obtiene del entorno, nunca se escribe en el código ni en GitHub.
 var cadenaConexion = builder.Configuration["CONNECTION_STRING"]
     ?? throw new InvalidOperationException("Falta la variable de entorno CONNECTION_STRING.");
 var jwtSecret = builder.Configuration["JWT_SECRET"]
@@ -21,21 +22,25 @@ var jwtSecret = builder.Configuration["JWT_SECRET"]
 var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? "AutoBrillo.Api";
 var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? "AutoBrillo.Web";
 
+// Registra la conexión a PostgreSQL y las clases que usa el controlador por inyección de dependencias.
 builder.Services.AddDbContext<AutoBrilloDbContext>(options => options.UseNpgsql(cadenaConexion));
 builder.Services.AddScoped<IUserRepository, RepositorioUsuarios>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddControllers();
 
-// En producción solo se permite la URL publicada de la aplicación web.
+// CORS define qué sitio web puede llamar a la API desde un navegador.
+// En producción WEB_ORIGIN contiene la URL pública de la web de Vercel.
 var origenWeb = builder.Configuration["WEB_ORIGIN"];
 builder.Services.AddCors(options => options.AddPolicy("Web", policy =>
 {
     policy.AllowAnyHeader().AllowAnyMethod();
     if (string.IsNullOrWhiteSpace(origenWeb))
-        policy.AllowAnyOrigin(); // Útil únicamente durante desarrollo local.
+        policy.AllowAnyOrigin(); // Solo sirve para facilitar pruebas locales.
     else
         policy.WithOrigins(origenWeb);
 }));
+
+// Configura cómo ASP.NET Core valida los tokens JWT que llegan en Authorization: Bearer TOKEN.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -53,10 +58,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Orden del middleware: redirección HTTPS, CORS, identificación del usuario y permisos.
 app.UseHttpsRedirection();
 app.UseCors("Web");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Endpoint simple para confirmar que el servicio responde sin hacer login.
 app.MapGet("/health", () => Results.Ok(new { estado = "correcto" }));
+
+// Activa los endpoints definidos en los controladores, por ejemplo AuthController.
 app.MapControllers();
 app.Run();
