@@ -17,17 +17,3 @@ else
         <div class="indicador"><strong>●</strong> Sistema operativo</div>
     </section>
 }
-
-@code {
-    private bool cargando = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (!await Autenticacion.ValidarSesionAsync())
-        {
-            Navegacion.NavigateTo("login", forceLoad: true);
-            return;
-        }
-        cargando = false;
-    }
-}

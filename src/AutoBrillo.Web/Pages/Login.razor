@@ -18,19 +18,3 @@
         <button class="boton-principal" disabled="@enviando">@(enviando ? "Ingresando..." : "Ingresar")</button>
     </EditForm>
 </section>
-
-@code {
-    private readonly Credenciales credenciales = new();
-    private string? error;
-    private bool enviando;
-
-    private async Task Ingresar()
-    {
-        enviando = true;
-        error = await Autenticacion.LoginAsync(credenciales.Nombre, credenciales.Password);
-        enviando = false;
-        if (error is null) Navegacion.NavigateTo("inicio", forceLoad: true);
-    }
-
-    private class Credenciales { public string Nombre { get; set; } = ""; public string Password { get; set; } = ""; }
-}
