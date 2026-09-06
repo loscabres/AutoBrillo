@@ -12,8 +12,8 @@
     <EditForm Model="credenciales" OnValidSubmit="Ingresar">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <label>Usuario <InputText @bind-Value="credenciales.Nombre" /></label>
-        <label>Contraseña <InputText @bind-Value="credenciales.Password" type="password" /></label>
+        <label>Usuario <input @bind="credenciales.Nombre" @ref="campoUsuario" autofocus autocomplete="username" /></label>
+        <label>Contraseña <input @bind="credenciales.Password" type="password" autocomplete="current-password" /></label>
         @if (error is not null) { <p class="error">@error</p> }
         <button class="boton-principal" disabled="@enviando">@(enviando ? "Ingresando..." : "Ingresar")</button>
     </EditForm>

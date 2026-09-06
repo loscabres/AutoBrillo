@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components;
+
 namespace AutoBrillo.Web.Pages;
 
 /// <summary>
@@ -6,8 +8,15 @@ namespace AutoBrillo.Web.Pages;
 public partial class Login
 {
     private readonly Credenciales credenciales = new();
+    private ElementReference campoUsuario;
     private string? error;
     private bool enviando;
+
+    protected override async Task OnAfterRenderAsync(bool primerRender)
+    {
+        if (primerRender)
+            await campoUsuario.FocusAsync();
+    }
 
     private async Task Ingresar()
     {
