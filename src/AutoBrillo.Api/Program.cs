@@ -68,6 +68,24 @@ app.UseAuthorization();
 // Endpoint simple para confirmar que el servicio responde sin hacer login.
 app.MapGet("/health", () => Results.Ok(new { estado = "correcto" }));
 
+// Comprueba en modo solo lectura que PostgreSQL/Supabase acepta conexiones.
+// No consulta ni modifica usuarios: sirve para confirmar que la API y la base están disponibles.
+app.MapGet("/health/base-datos", async (AutoBrilloDbContext contexto, CancellationToken cancelacion) =>
+{
+    try
+    {
+        var conectada = await contexto.Database.CanConnectAsync(cancelacion);
+        return conectada
+            ? Results.Ok(new { estado = "correcto", baseDatos = "conectada" })
+            : Results.Problem(statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+    catch
+    {
+        // No se devuelven detalles internos ni cadenas de conexión al cliente.
+        return Results.Problem(statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+});
+
 // Activa los endpoints definidos en los controladores, por ejemplo AuthController.
 app.MapControllers();
 app.Run();
