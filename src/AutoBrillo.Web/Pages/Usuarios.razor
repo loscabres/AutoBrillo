@@ -21,7 +21,10 @@ else
             <button @onclick="Guardar">@(edicion.Id_Usuarios == 0 ? "Crear usuario" : "Guardar cambios")</button>
             @if (edicion.Id_Usuarios != 0) { <button class="secundario" @onclick="Cancelar">Cancelar</button> }
         </div>
-        @if (!string.IsNullOrWhiteSpace(mensaje)) { <p class="mensaje">@mensaje</p> }
+        @if (!string.IsNullOrWhiteSpace(mensaje))
+        {
+            <dialog open><h2>Revisá los datos</h2><p>@mensaje</p><button @onclick="CerrarMensaje">Entendido</button></dialog>
+        }
         <table>
             <thead><tr><th>Id</th><th>Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>
             <tbody>

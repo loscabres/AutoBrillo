@@ -9,7 +9,6 @@ public class UsuarioRequest
     public string Nombre { get; set; } = string.Empty;
 
     /// <summary>Contraseña nueva. Es obligatoria al crear y opcional al editar.</summary>
-    [MinLength(6)]
     public string? Password { get; set; }
 
     /// <summary>Uno o varios roles obligatorios para el usuario.</summary>

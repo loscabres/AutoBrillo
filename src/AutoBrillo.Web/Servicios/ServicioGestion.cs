@@ -32,8 +32,21 @@ public class ServicioGestion(HttpClient http)
     private static async Task<string?> LeerErrorAsync(HttpResponseMessage respuesta)
     {
         if (respuesta.IsSuccessStatusCode) return null;
-        var texto = await respuesta.Content.ReadAsStringAsync();
-        return string.IsNullOrWhiteSpace(texto) ? "No fue posible completar la operación." : texto;
+        try
+        {
+            var problema = await respuesta.Content.ReadFromJsonAsync<ProblemaApi>();
+            if (!string.IsNullOrWhiteSpace(problema?.Mensaje)) return problema.Mensaje;
+            if (problema?.Errors is not null)
+                return problema.Errors.Values.SelectMany(x => x).FirstOrDefault() ?? "No fue posible completar la operación.";
+        }
+        catch (System.Text.Json.JsonException) { }
+        return "No fue posible completar la operación. Revisá los datos e intentá de nuevo.";
+    }
+
+    private sealed class ProblemaApi
+    {
+        public string? Mensaje { get; set; }
+        public Dictionary<string, string[]>? Errors { get; set; }
     }
 }
 

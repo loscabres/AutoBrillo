@@ -22,6 +22,8 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
     {
         if (string.IsNullOrWhiteSpace(request.Password))
             return BadRequest(new { mensaje = "La contraseña es obligatoria al crear un usuario." });
+        if (request.Password.Length < 6)
+            return BadRequest(new { mensaje = "La contraseña debe tener al menos 6 caracteres." });
         var nombre = request.Nombre.Trim();
         if (await usuarios.ExisteNombreAsync(nombre, cancellationToken))
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
@@ -47,6 +49,9 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
 
         var rolesSeleccionados = await ObtenerRolesValidosAsync(request.Id_Roles, cancellationToken);
         if (rolesSeleccionados is null) return BadRequest(new { mensaje = "Debe seleccionar al menos un rol válido." });
+
+        if (!string.IsNullOrWhiteSpace(request.Password) && request.Password.Length < 6)
+            return BadRequest(new { mensaje = "La contraseña debe tener al menos 6 caracteres." });
 
         usuario.Nombre = nombre;
         usuario.Roles = rolesSeleccionados;

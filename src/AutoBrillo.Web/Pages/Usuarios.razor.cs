@@ -43,6 +43,7 @@ public partial class Usuarios
         else edicion.Id_Roles.Add(idRol);
     }
     private void Cancelar() { edicion = new(); mensaje = null; }
+    private void CerrarMensaje() => mensaje = null;
     private void PedirEliminar(UsuarioDto usuario) { usuarioAEliminar = usuario; mensaje = null; }
     private void CancelarEliminar() => usuarioAEliminar = null;
     private async Task EliminarConfirmado()
