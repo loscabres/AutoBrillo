@@ -8,6 +8,12 @@ namespace AutoBrillo.Repository.Repositorios;
 /// </summary>
 public interface IUserRepository
 {
+    /// <summary>Obtiene todos los usuarios junto con su rol.</summary>
+    Task<List<Usuario>> ObtenerTodosAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Busca un usuario por su identificador.</summary>
+    Task<Usuario?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
+
     /// <summary>Busca un usuario por su nombre. Devuelve null cuando no existe.</summary>
     Task<Usuario?> ObtenerPorNombreAsync(string nombre, CancellationToken cancellationToken = default);
 
@@ -16,6 +22,9 @@ public interface IUserRepository
 
     /// <summary>Prepara un usuario nuevo para ser guardado.</summary>
     Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default);
+
+    /// <summary>Marca un usuario para eliminarlo.</summary>
+    void Eliminar(Usuario usuario);
 
     /// <summary>Confirma en la base de datos los cambios preparados.</summary>
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);

@@ -10,6 +10,14 @@ namespace AutoBrillo.Repository.Repositorios;
 /// </summary>
 public class RepositorioUsuarios(AutoBrilloDbContext contexto) : IUserRepository
 {
+    /// <summary>Obtiene todos los usuarios y sus roles para la grilla del ABM.</summary>
+    public Task<List<Usuario>> ObtenerTodosAsync(CancellationToken cancellationToken = default) =>
+        contexto.Usuarios.Include(x => x.Rol).OrderBy(x => x.Nombre).ToListAsync(cancellationToken);
+
+    /// <summary>Busca un usuario por su clave primaria junto con su rol.</summary>
+    public Task<Usuario?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default) =>
+        contexto.Usuarios.Include(x => x.Rol).SingleOrDefaultAsync(x => x.Id_Usuarios == id, cancellationToken);
+
     /// <summary>
     /// Consulta un único usuario cuyo Nombre coincida exactamente con el valor indicado.
     /// SingleOrDefaultAsync devuelve null cuando la consulta no encuentra ninguno.
@@ -30,6 +38,9 @@ public class RepositorioUsuarios(AutoBrilloDbContext contexto) : IUserRepository
     /// </summary>
     public Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default) =>
         contexto.Usuarios.AddAsync(usuario, cancellationToken).AsTask();
+
+    /// <summary>Marca el usuario para eliminarlo en el próximo GuardarCambiosAsync.</summary>
+    public void Eliminar(Usuario usuario) => contexto.Usuarios.Remove(usuario);
 
     /// <summary>Envía a PostgreSQL los cambios pendientes, por ejemplo el INSERT de un usuario nuevo.</summary>
     public Task GuardarCambiosAsync(CancellationToken cancellationToken = default) =>

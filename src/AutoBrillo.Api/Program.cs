@@ -25,6 +25,7 @@ var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? "AutoBrillo.Web";
 // Registra la conexión a PostgreSQL y las clases que usa el controlador por inyección de dependencias.
 builder.Services.AddDbContext<AutoBrilloDbContext>(options => options.UseNpgsql(cadenaConexion));
 builder.Services.AddScoped<IUserRepository, RepositorioUsuarios>();
+builder.Services.AddScoped<IRolRepository, RepositorioRoles>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddControllers();
 

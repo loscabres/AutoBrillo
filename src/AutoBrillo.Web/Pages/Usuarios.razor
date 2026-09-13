@@ -1,0 +1,39 @@
+@page "/usuarios"
+@inject ServicioAutenticacion Autenticacion
+@inject ServicioGestion Gestion
+@inject NavigationManager Navegacion
+
+<PageTitle>Usuarios | AutoBrillo</PageTitle>
+
+@if (cargando)
+{
+    <p>Comprobando tu sesión...</p>
+}
+else
+{
+    <section class="panel-abm">
+        <h1>ABM de Usuarios</h1>
+        <p>Asigná un nombre, contraseña y rol a cada usuario del lavadero.</p>
+        <div class="formulario-abm formulario-usuarios">
+            <input @bind="edicion.Nombre" placeholder="Nombre de usuario" maxlength="100" />
+            <input @bind="edicion.Password" type="password" placeholder="@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")" />
+            <select @bind="edicion.Id_Roles"><option value="0">Seleccioná un rol</option>@foreach (var rol in roles) { <option value="@rol.Id_Roles">@rol.Descripcion</option> }</select>
+            <button @onclick="Guardar">@(edicion.Id_Usuarios == 0 ? "Crear usuario" : "Guardar cambios")</button>
+            @if (edicion.Id_Usuarios != 0) { <button class="secundario" @onclick="Cancelar">Cancelar</button> }
+        </div>
+        @if (!string.IsNullOrWhiteSpace(mensaje)) { <p class="mensaje">@mensaje</p> }
+        <table>
+            <thead><tr><th>Id</th><th>Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var usuario in usuarios)
+                {
+                    <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@usuario.Rol</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
+                }
+            </tbody>
+        </table>
+    </section>
+    @if (usuarioAEliminar is not null)
+    {
+        <dialog open><h2>¿Eliminar usuario?</h2><p>Se eliminará el usuario <strong>@usuarioAEliminar.Nombre</strong>.</p><button class="peligro" @onclick="EliminarConfirmado">Eliminar</button><button class="secundario" @onclick="CancelarEliminar">Cancelar</button></dialog>
+    }
+}

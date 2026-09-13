@@ -37,7 +37,8 @@ public class AuthController(IUserRepository usuarios, PasswordHasher passwordHas
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
 
         // PasswordHasher convierte la contraseña a BCrypt antes de crear el objeto Usuario.
-        var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password) };
+        // El endpoint original de registro conserva Administrador como rol inicial; el ABM permite elegir cualquier rol.
+        var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password), Id_Roles = 1 };
 
         // Se agrega el objeto y después se confirma el INSERT en PostgreSQL.
         await usuarios.AgregarAsync(usuario, cancellationToken);

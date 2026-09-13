@@ -9,6 +9,7 @@
         @if (!string.IsNullOrWhiteSpace(usuario))
         {
             @* El botón ejecuta Salir, definido en MainLayout.razor.cs. *@
+            <nav class="menu"><a href="roles">Roles</a><a href="usuarios">Usuarios</a></nav>
             <div class="sesion"><span>Hola, @usuario</span><button @onclick="Salir">Salir</button></div>
         }
     </header>

@@ -24,4 +24,10 @@ public class Usuario
     /// Nunca contiene ni devuelve la contraseña original escrita por el usuario.
     /// </summary>
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>Clave foránea que enlaza el usuario con su rol obligatorio.</summary>
+    public int Id_Roles { get; set; }
+
+    /// <summary>Datos del rol asignado. EF Core carga esta relación desde la tabla roles.</summary>
+    public Rol Rol { get; set; } = null!;
 }

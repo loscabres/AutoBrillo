@@ -16,6 +16,9 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
     /// </summary>
     public DbSet<Usuario> Usuarios => Set<Usuario>();
 
+    /// <summary>Representa la tabla roles dentro del código.</summary>
+    public DbSet<Rol> Roles => Set<Rol>();
+
     /// <summary>
     /// Configura cómo se relaciona Usuario con la tabla real de la base de datos.
     /// Se ejecuta cuando EF Core construye su modelo interno.
@@ -37,5 +40,19 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
 
         // Password es obligatorio y guarda el hash BCrypt, no el texto original.
         usuario.Property(x => x.Password).HasColumnName("Password").IsRequired();
+
+        // Cada usuario tiene un rol obligatorio y un rol puede pertenecer a varios usuarios.
+        usuario.Property(x => x.Id_Roles).HasColumnName("Id_Roles").IsRequired();
+        usuario.HasOne(x => x.Rol)
+            .WithMany(x => x.Usuarios)
+            .HasForeignKey(x => x.Id_Roles)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        var rol = modelBuilder.Entity<Rol>();
+        rol.ToTable("roles");
+        rol.HasKey(x => x.Id_Roles);
+        rol.Property(x => x.Id_Roles).HasColumnName("Id_Roles");
+        rol.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(100).IsRequired();
+        rol.HasIndex(x => x.Descripcion).IsUnique();
     }
 }
