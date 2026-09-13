@@ -27,6 +27,7 @@ public class AuthController(IUserRepository usuarios, IRolRepository roles, Pass
     /// 201 con Id_Usuarios y Nombre si se registró; 409 si el nombre ya estaba usado.
     /// </returns>
     [HttpPost("register")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> Registro(CredencialesRequest request, CancellationToken cancellationToken)
     {
         // Trim elimina espacios involuntarios al inicio y al final del nombre.
