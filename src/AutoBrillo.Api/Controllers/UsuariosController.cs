@@ -7,37 +7,29 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBrillo.Api.Controllers;
 
-/// <summary>ABM de usuarios. Las contraseñas se transforman con BCrypt antes de guardarse.</summary>
+/// <summary>ABM de usuarios con uno o varios roles. Las contraseñas se guardan mediante BCrypt.</summary>
 [ApiController]
 [Authorize]
 [Route("api/usuarios")]
 public class UsuariosController(IUserRepository usuarios, IRolRepository roles, PasswordHasher passwordHasher) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<UsuarioResponse>>> ObtenerTodos(CancellationToken cancellationToken)
-    {
-        var lista = await usuarios.ObtenerTodosAsync(cancellationToken);
-        return Ok(lista.Select(Convertir).ToList());
-    }
+    public async Task<ActionResult<List<UsuarioResponse>>> ObtenerTodos(CancellationToken cancellationToken) =>
+        Ok((await usuarios.ObtenerTodosAsync(cancellationToken)).Select(Convertir).ToList());
 
     [HttpPost]
     public async Task<IActionResult> Crear(UsuarioRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Password))
             return BadRequest(new { mensaje = "La contraseña es obligatoria al crear un usuario." });
-
         var nombre = request.Nombre.Trim();
         if (await usuarios.ExisteNombreAsync(nombre, cancellationToken))
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
-        if (await roles.ObtenerPorIdAsync(request.Id_Roles, cancellationToken) is null)
-            return BadRequest(new { mensaje = "El rol seleccionado no existe." });
 
-        var usuario = new Usuario
-        {
-            Nombre = nombre,
-            Password = passwordHasher.Hashear(request.Password),
-            Id_Roles = request.Id_Roles
-        };
+        var rolesSeleccionados = await ObtenerRolesValidosAsync(request.Id_Roles, cancellationToken);
+        if (rolesSeleccionados is null) return BadRequest(new { mensaje = "Debe seleccionar al menos un rol válido." });
+
+        var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password), Roles = rolesSeleccionados };
         await usuarios.AgregarAsync(usuario, cancellationToken);
         await usuarios.GuardarCambiosAsync(cancellationToken);
         usuario = await usuarios.ObtenerPorIdAsync(usuario.Id_Usuarios, cancellationToken) ?? usuario;
@@ -49,18 +41,16 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
     {
         var usuario = await usuarios.ObtenerPorIdAsync(id, cancellationToken);
         if (usuario is null) return NotFound(new { mensaje = "Usuario no encontrado." });
-
         var nombre = request.Nombre.Trim();
         if (await usuarios.ExisteNombreAsync(nombre, cancellationToken) && usuario.Nombre != nombre)
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
-        if (await roles.ObtenerPorIdAsync(request.Id_Roles, cancellationToken) is null)
-            return BadRequest(new { mensaje = "El rol seleccionado no existe." });
+
+        var rolesSeleccionados = await ObtenerRolesValidosAsync(request.Id_Roles, cancellationToken);
+        if (rolesSeleccionados is null) return BadRequest(new { mensaje = "Debe seleccionar al menos un rol válido." });
 
         usuario.Nombre = nombre;
-        usuario.Id_Roles = request.Id_Roles;
-        if (!string.IsNullOrWhiteSpace(request.Password))
-            usuario.Password = passwordHasher.Hashear(request.Password);
-
+        usuario.Roles = rolesSeleccionados;
+        if (!string.IsNullOrWhiteSpace(request.Password)) usuario.Password = passwordHasher.Hashear(request.Password);
         await usuarios.GuardarCambiosAsync(cancellationToken);
         usuario = await usuarios.ObtenerPorIdAsync(id, cancellationToken) ?? usuario;
         return Ok(Convertir(usuario));
@@ -71,12 +61,28 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
     {
         var usuario = await usuarios.ObtenerPorIdAsync(id, cancellationToken);
         if (usuario is null) return NotFound(new { mensaje = "Usuario no encontrado." });
-
         usuarios.Eliminar(usuario);
         await usuarios.GuardarCambiosAsync(cancellationToken);
         return NoContent();
     }
 
-    private static UsuarioResponse Convertir(Usuario usuario) =>
-        new(usuario.Id_Usuarios, usuario.Nombre, usuario.Id_Roles, usuario.Rol?.Descripcion ?? string.Empty);
+    private async Task<List<Rol>?> ObtenerRolesValidosAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+    {
+        var idsUnicos = ids.Distinct().ToList();
+        if (idsUnicos.Count == 0) return null;
+        var resultado = new List<Rol>();
+        foreach (var id in idsUnicos)
+        {
+            var rol = await roles.ObtenerPorIdAsync(id, cancellationToken);
+            if (rol is null) return null;
+            resultado.Add(rol);
+        }
+        return resultado;
+    }
+
+    private static UsuarioResponse Convertir(Usuario usuario) => new(
+        usuario.Id_Usuarios,
+        usuario.Nombre,
+        usuario.Roles.Select(x => x.Id_Roles).ToList(),
+        usuario.Roles.OrderBy(x => x.Descripcion).Select(x => x.Descripcion).ToList());
 }

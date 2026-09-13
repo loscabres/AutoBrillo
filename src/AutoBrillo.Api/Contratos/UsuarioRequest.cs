@@ -12,6 +12,7 @@ public class UsuarioRequest
     [MinLength(6)]
     public string? Password { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un rol.")]
-    public int Id_Roles { get; set; }
+    /// <summary>Uno o varios roles obligatorios para el usuario.</summary>
+    [MinLength(1, ErrorMessage = "Debe seleccionar al menos un rol.")]
+    public List<int> Id_Roles { get; set; } = [];
 }

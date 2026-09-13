@@ -17,7 +17,7 @@ namespace AutoBrillo.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IUserRepository usuarios, PasswordHasher passwordHasher, IConfiguration configuracion) : ControllerBase
+public class AuthController(IUserRepository usuarios, IRolRepository roles, PasswordHasher passwordHasher, IConfiguration configuracion) : ControllerBase
 {
     /// <summary>
     /// Crea un usuario nuevo.
@@ -36,9 +36,10 @@ public class AuthController(IUserRepository usuarios, PasswordHasher passwordHas
         if (await usuarios.ExisteNombreAsync(nombre, cancellationToken))
             return Conflict(new { mensaje = "El nombre de usuario ya está registrado." });
 
-        // PasswordHasher convierte la contraseña a BCrypt antes de crear el objeto Usuario.
-        // El endpoint original de registro conserva Administrador como rol inicial; el ABM permite elegir cualquier rol.
-        var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password), Id_Roles = 1 };
+        // PasswordHasher convierte la contraseña a BCrypt. El registro original asigna Administrador por defecto.
+        var administrador = await roles.ObtenerPorDescripcionAsync("Administrador", cancellationToken);
+        if (administrador is null) return Problem("No existe el rol Administrador.", statusCode: StatusCodes.Status500InternalServerError);
+        var usuario = new Usuario { Nombre = nombre, Password = passwordHasher.Hashear(request.Password), Roles = [administrador] };
 
         // Se agrega el objeto y después se confirma el INSERT en PostgreSQL.
         await usuarios.AgregarAsync(usuario, cancellationToken);

@@ -17,7 +17,7 @@ else
         <div class="formulario-abm formulario-usuarios">
             <input @bind="edicion.Nombre" placeholder="Nombre de usuario" maxlength="100" />
             <input @bind="edicion.Password" type="password" placeholder="@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")" />
-            <select @bind="edicion.Id_Roles"><option value="0">Seleccioná un rol</option>@foreach (var rol in roles) { <option value="@rol.Id_Roles">@rol.Descripcion</option> }</select>
+            <div class="roles-check">@foreach (var rol in roles) { <label><input type="checkbox" checked="@EstaSeleccionado(rol.Id_Roles)" @onchange="() => CambiarRol(rol.Id_Roles)" /> @rol.Descripcion</label> }</div>
             <button @onclick="Guardar">@(edicion.Id_Usuarios == 0 ? "Crear usuario" : "Guardar cambios")</button>
             @if (edicion.Id_Usuarios != 0) { <button class="secundario" @onclick="Cancelar">Cancelar</button> }
         </div>
@@ -27,7 +27,7 @@ else
             <tbody>
                 @foreach (var usuario in usuarios)
                 {
-                    <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@usuario.Rol</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
+                    <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@string.Join(", ", usuario.Roles)</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
                 }
             </tbody>
         </table>

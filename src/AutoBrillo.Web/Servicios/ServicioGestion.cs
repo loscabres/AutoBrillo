@@ -43,11 +43,11 @@ public class RolDto
     public string Descripcion { get; set; } = string.Empty;
 }
 
-public record UsuarioDto(int Id_Usuarios, string Nombre, int Id_Roles, string Rol);
+public record UsuarioDto(int Id_Usuarios, string Nombre, List<int> Id_Roles, List<string> Roles);
 public class UsuarioEdicionDto
 {
     public int Id_Usuarios { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public int Id_Roles { get; set; }
+    public List<int> Id_Roles { get; set; } = [];
 }

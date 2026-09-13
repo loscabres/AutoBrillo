@@ -41,12 +41,21 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
         // Password es obligatorio y guarda el hash BCrypt, no el texto original.
         usuario.Property(x => x.Password).HasColumnName("Password").IsRequired();
 
-        // Cada usuario tiene un rol obligatorio y un rol puede pertenecer a varios usuarios.
-        usuario.Property(x => x.Id_Roles).HasColumnName("Id_Roles").IsRequired();
-        usuario.HasOne(x => x.Rol)
+        // Un usuario puede tener varios roles y cada rol puede pertenecer a varios usuarios.
+        // La tabla intermedia usuarios_roles guarda cada asignación sin duplicados.
+        usuario.HasMany(x => x.Roles)
             .WithMany(x => x.Usuarios)
-            .HasForeignKey(x => x.Id_Roles)
-            .OnDelete(DeleteBehavior.Restrict);
+            .UsingEntity<Dictionary<string, object>>(
+                "usuarios_roles",
+                relacion => relacion.HasOne<Rol>().WithMany().HasForeignKey("Id_Roles").OnDelete(DeleteBehavior.Restrict),
+                relacion => relacion.HasOne<Usuario>().WithMany().HasForeignKey("Id_Usuarios").OnDelete(DeleteBehavior.Cascade),
+                relacion =>
+                {
+                    relacion.ToTable("usuarios_roles");
+                    relacion.HasKey("Id_Usuarios", "Id_Roles");
+                    relacion.IndexerProperty<int>("Id_Usuarios").HasColumnName("Id_Usuarios");
+                    relacion.IndexerProperty<int>("Id_Roles").HasColumnName("Id_Roles");
+                });
 
         var rol = modelBuilder.Entity<Rol>();
         rol.ToTable("roles");
