@@ -11,30 +11,79 @@
 }
 else
 {
-    <section class="panel-abm">
-        <h1>ABM de Usuarios</h1>
-        <p>Asigná un nombre, contraseña y rol a cada usuario del lavadero.</p>
-        <div class="formulario-abm formulario-usuarios">
-            <input @bind="edicion.Nombre" placeholder="Nombre de usuario" maxlength="100" />
-            <input @bind="edicion.Password" type="password" placeholder="@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")" />
-            <div class="roles-check">@foreach (var rol in roles) { <label><input type="checkbox" checked="@EstaSeleccionado(rol.Id_Roles)" @onchange="() => CambiarRol(rol.Id_Roles)" /> @rol.Descripcion</label> }</div>
-            <button @onclick="Guardar">@(edicion.Id_Usuarios == 0 ? "Crear usuario" : "Guardar cambios")</button>
-            @if (edicion.Id_Usuarios != 0) { <button class="secundario" @onclick="Cancelar">Cancelar</button> }
+    <section class="panel-abm panel-usuarios">
+        <header class="encabezado-abm">
+            <div>
+                <p class="etiqueta">ADMINISTRACIÓN</p>
+                <h1>Usuarios y accesos</h1>
+                <p>Creá usuarios y elegí los roles que podrán utilizar dentro del lavadero.</p>
+            </div>
+            <div class="insignia-acceso" aria-hidden="true">◈</div>
+        </header>
+
+        <div class="formulario-usuario">
+            <div class="campo-usuario">
+                <label for="nombre-usuario">Nombre de usuario</label>
+                <input id="nombre-usuario" @bind="edicion.Nombre" placeholder="Ej.: María González" maxlength="100" />
+            </div>
+            <div class="campo-usuario">
+                <label for="password-usuario">@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")</label>
+                <input id="password-usuario" @bind="edicion.Password" type="password" placeholder="Mínimo 6 caracteres" />
+            </div>
         </div>
+
+        <section class="acceso-roles" aria-labelledby="titulo-roles">
+            <div class="encabezado-roles">
+                <div>
+                    <p class="etiqueta">ROL Y ACCESO</p>
+                    <h2 id="titulo-roles">Elegí los roles del usuario</h2>
+                    <p>Marcá uno o más roles según las tareas que realizará.</p>
+                </div>
+                <span class="contador-roles">@edicion.Id_Roles.Count seleccionado@(edicion.Id_Roles.Count == 1 ? "" : "s")</span>
+            </div>
+            <div class="grilla-roles">
+                @foreach (var rol in roles)
+                {
+                    var seleccionado = EstaSeleccionado(rol.Id_Roles);
+                    <label class="tarjeta-rol @(seleccionado ? "rol-seleccionado" : "")">
+                        <input type="checkbox" checked="@seleccionado" @onchange="() => CambiarRol(rol.Id_Roles)" />
+                        <span class="marca-rol" aria-hidden="true">@rol.Descripcion[..1].ToUpper()</span>
+                        <span class="detalle-rol">
+                            <small>ROL</small>
+                            <strong>@rol.Descripcion</strong>
+                        </span>
+                        <span class="estado-rol" aria-hidden="true">✓</span>
+                    </label>
+                }
+            </div>
+        </section>
+
+        <div class="acciones-formulario">
+            <button @onclick="Guardar">@(edicion.Id_Usuarios == 0 ? "Crear usuario" : "Guardar cambios")</button>
+            @if (edicion.Id_Usuarios != 0)
+            {
+                <button class="secundario" @onclick="Cancelar">Cancelar edición</button>
+            }
+        </div>
+
         @if (!string.IsNullOrWhiteSpace(mensaje))
         {
             <dialog open><h2>Revisá los datos</h2><p>@mensaje</p><button @onclick="CerrarMensaje">Entendido</button></dialog>
         }
-        <table>
-            <thead><tr><th>Id</th><th>Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>
-            <tbody>
-                @foreach (var usuario in usuarios)
-                {
-                    <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@string.Join(", ", usuario.Roles)</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
-                }
-            </tbody>
-        </table>
+
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Id</th><th>Usuario</th><th>Roles asignados</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    @foreach (var usuario in usuarios)
+                    {
+                        <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@string.Join(", ", usuario.Roles)</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
+
     @if (usuarioAEliminar is not null)
     {
         <dialog open><h2>¿Eliminar usuario?</h2><p>Se eliminará el usuario <strong>@usuarioAEliminar.Nombre</strong>.</p><button class="peligro" @onclick="EliminarConfirmado">Eliminar</button><button class="secundario" @onclick="CancelarEliminar">Cancelar</button></dialog>
