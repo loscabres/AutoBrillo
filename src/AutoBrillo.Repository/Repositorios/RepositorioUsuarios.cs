@@ -23,7 +23,7 @@ public class RepositorioUsuarios(AutoBrilloDbContext contexto) : IUserRepository
     /// SingleOrDefaultAsync devuelve null cuando la consulta no encuentra ninguno.
     /// </summary>
     public Task<Usuario?> ObtenerPorNombreAsync(string nombre, CancellationToken cancellationToken = default) =>
-        contexto.Usuarios.SingleOrDefaultAsync(x => x.Nombre == nombre, cancellationToken);
+        contexto.Usuarios.Include(x => x.Roles).SingleOrDefaultAsync(x => x.Nombre == nombre, cancellationToken);
 
     /// <summary>
     /// Pregunta a la base si existe al menos un usuario con ese nombre.

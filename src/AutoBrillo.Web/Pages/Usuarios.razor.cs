@@ -15,6 +15,7 @@ public partial class Usuarios
     protected override async Task OnInitializedAsync()
     {
         if (!await Autenticacion.ValidarSesionAsync()) { Navegacion.NavigateTo("login", true); return; }
+        if (!await Autenticacion.EsAdministradorAsync()) { Navegacion.NavigateTo("inicio", true); return; }
         await CargarAsync();
         cargando = false;
     }

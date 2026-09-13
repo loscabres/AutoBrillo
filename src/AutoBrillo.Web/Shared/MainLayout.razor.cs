@@ -8,11 +8,13 @@ public partial class MainLayout
 {
     // Nombre que se leerá de localStorage para saludar al usuario en la barra superior.
     private string? usuario;
+    private bool esAdministrador;
 
     /// <summary>Obtiene el nombre de la sesión guardada cuando se crea el diseño de la página.</summary>
     protected override async Task OnInitializedAsync()
     {
         usuario = await Autenticacion.ObtenerUsuarioAsync();
+        esAdministrador = await Autenticacion.EsAdministradorAsync();
     }
 
     /// <summary>

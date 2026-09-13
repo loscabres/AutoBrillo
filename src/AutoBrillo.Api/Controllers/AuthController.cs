@@ -65,7 +65,7 @@ public class AuthController(IUserRepository usuarios, IRolRepository roles, Pass
             return Unauthorized(new { mensaje = "Nombre o contraseña incorrectos." });
 
         // El token permite acceder posteriormente a endpoints marcados con [Authorize].
-        return Ok(new { token = CrearToken(usuario), usuario = usuario.Nombre });
+        return Ok(new { token = CrearToken(usuario), usuario = usuario.Nombre, esAdministrador = usuario.Roles.Any(rol => rol.Descripcion == "Administrador") });
     }
 
     /// <summary>
@@ -77,7 +77,8 @@ public class AuthController(IUserRepository usuarios, IRolRepository roles, Pass
     public IActionResult Me() => Ok(new
     {
         id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-        usuario = User.Identity?.Name
+        usuario = User.Identity?.Name,
+        esAdministrador = User.IsInRole("Administrador")
     });
 
     /// <summary>
@@ -92,11 +93,12 @@ public class AuthController(IUserRepository usuarios, IRolRepository roles, Pass
 
         // HMAC SHA-256 firma el token para que no pueda ser modificado por el navegador.
         var credenciales = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clave)), SecurityAlgorithms.HmacSha256);
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, usuario.Id_Usuarios.ToString()),
-            new Claim(ClaimTypes.Name, usuario.Nombre)
+            new(ClaimTypes.NameIdentifier, usuario.Id_Usuarios.ToString()),
+            new(ClaimTypes.Name, usuario.Nombre)
         };
+        claims.AddRange(usuario.Roles.Select(rol => new Claim(ClaimTypes.Role, rol.Descripcion)));
 
         var token = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.UtcNow.AddHours(8), signingCredentials: credenciales);
         return new JwtSecurityTokenHandler().WriteToken(token);

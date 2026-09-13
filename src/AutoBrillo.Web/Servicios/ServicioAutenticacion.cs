@@ -13,6 +13,7 @@ public class ServicioAutenticacion(HttpClient http, IJSRuntime js)
     // Nombres con los que el navegador guarda los datos de sesión en localStorage.
     private const string ClaveToken = "autobrillo.token";
     private const string ClaveUsuario = "autobrillo.usuario";
+    private const string ClaveEsAdministrador = "autobrillo.esAdministrador";
 
     /// <summary>
     /// Envía Nombre y Password a POST /api/auth/login.
@@ -31,12 +32,20 @@ public class ServicioAutenticacion(HttpClient http, IJSRuntime js)
         // localStorage conserva la sesión aunque se actualice la página del navegador.
         await js.InvokeVoidAsync("localStorage.setItem", ClaveToken, datos.Token);
         await js.InvokeVoidAsync("localStorage.setItem", ClaveUsuario, datos.Usuario);
+        await js.InvokeVoidAsync("localStorage.setItem", ClaveEsAdministrador, datos.EsAdministrador.ToString().ToLowerInvariant());
         return null;
     }
 
     /// <summary>Obtiene el nombre almacenado para mostrarlo en la barra superior.</summary>
     public async Task<string?> ObtenerUsuarioAsync() =>
         await js.InvokeAsync<string?>("localStorage.getItem", ClaveUsuario);
+
+    /// <summary>Indica si el usuario actual posee el rol Administrador.</summary>
+    public async Task<bool> EsAdministradorAsync()
+    {
+        var valor = await js.InvokeAsync<string?>("localStorage.getItem", ClaveEsAdministrador);
+        return bool.TryParse(valor, out var esAdministrador) && esAdministrador;
+    }
 
     /// <summary>
     /// Comprueba que existe un token y pregunta a GET /api/auth/me si sigue siendo válido.
@@ -47,9 +56,14 @@ public class ServicioAutenticacion(HttpClient http, IJSRuntime js)
         var token = await js.InvokeAsync<string?>("localStorage.getItem", ClaveToken);
         if (string.IsNullOrWhiteSpace(token)) return false;
 
-        // Agrega el token al encabezado que la API usa para identificar al usuario.
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        return (await http.GetAsync("api/auth/me")).IsSuccessStatusCode;
+        var respuesta = await http.GetAsync("api/auth/me");
+        if (!respuesta.IsSuccessStatusCode) return false;
+
+        var datos = await respuesta.Content.ReadFromJsonAsync<MeResponse>();
+        if (datos is not null)
+            await js.InvokeVoidAsync("localStorage.setItem", ClaveEsAdministrador, datos.EsAdministrador.ToString().ToLowerInvariant());
+        return true;
     }
 
     /// <summary>
@@ -60,8 +74,12 @@ public class ServicioAutenticacion(HttpClient http, IJSRuntime js)
         http.DefaultRequestHeaders.Authorization = null;
         await js.InvokeVoidAsync("localStorage.removeItem", ClaveToken);
         await js.InvokeVoidAsync("localStorage.removeItem", ClaveUsuario);
+        await js.InvokeVoidAsync("localStorage.removeItem", ClaveEsAdministrador);
     }
 
     /// <summary>Formato de la respuesta JSON que devuelve el endpoint de login.</summary>
-    private sealed record LoginResponse(string Token, string Usuario);
+    private sealed record LoginResponse(string Token, string Usuario, bool EsAdministrador);
+
+    /// <summary>Formato mínimo de la respuesta de GET /api/auth/me.</summary>
+    private sealed record MeResponse(bool EsAdministrador);
 }

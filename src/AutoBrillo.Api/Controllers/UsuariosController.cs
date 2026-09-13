@@ -9,7 +9,7 @@ namespace AutoBrillo.Api.Controllers;
 
 /// <summary>ABM de usuarios con uno o varios roles. Las contraseñas se guardan mediante BCrypt.</summary>
 [ApiController]
-[Authorize]
+[Authorize(Roles = "Administrador")]
 [Route("api/usuarios")]
 public class UsuariosController(IUserRepository usuarios, IRolRepository roles, PasswordHasher passwordHasher) : ControllerBase
 {

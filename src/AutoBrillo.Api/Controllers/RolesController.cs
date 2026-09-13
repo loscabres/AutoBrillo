@@ -8,7 +8,7 @@ namespace AutoBrillo.Api.Controllers;
 
 /// <summary>ABM de roles. Solo usuarios con sesión iniciada pueden administrarlos.</summary>
 [ApiController]
-[Authorize]
+[Authorize(Roles = "Administrador")]
 [Route("api/roles")]
 public class RolesController(IRolRepository roles) : ControllerBase
 {
