@@ -11,10 +11,17 @@ public class ServicioAlertas(IJSRuntime javascript)
             "¿Eliminar usuario?",
             nombre);
 
-    public ValueTask MostrarEliminacionExitosaAsync(string nombre)
-        => javascript.InvokeVoidAsync(
-            "autobrilloAlerta.exito",
-            $"El usuario {nombre} fue eliminado correctamente.");
+    public ValueTask<bool> ConfirmarEliminarRolAsync(string descripcion)
+        => javascript.InvokeAsync<bool>(
+            "autobrilloAlerta.confirmarEliminarRol",
+            "¿Eliminar rol?",
+            descripcion);
+
+    public ValueTask MostrarErrorGeneralAsync(string titulo, string detalle)
+        => javascript.InvokeVoidAsync("autobrilloAlerta.mensajeError", titulo, detalle);
+
+    public ValueTask MostrarEliminacionExitosaAsync(string mensaje)
+        => javascript.InvokeVoidAsync("autobrilloAlerta.exito", mensaje);
 
     public ValueTask MostrarErrorEliminarAsync(string detalle)
         => javascript.InvokeVoidAsync("autobrilloAlerta.error", detalle);

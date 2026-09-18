@@ -1,6 +1,7 @@
 @page "/"
 @page "/login"
 @inject ServicioAutenticacion Autenticacion
+@inject ServicioAlertas Alertas
 @inject NavigationManager Navegacion
 
 @* Esta pantalla recibe Usuario y Contraseña y llama al método Ingresar de Login.razor.cs. *@
@@ -19,8 +20,6 @@
         <label>Usuario <input @bind="credenciales.Nombre" @ref="campoUsuario" autofocus autocomplete="username" /></label>
         <label>Contraseña <input @bind="credenciales.Password" type="password" autocomplete="current-password" /></label>
 
-        @* El mensaje aparece solo cuando LoginAsync devuelve un error. *@
-        @if (error is not null) { <p class="error">@error</p> }
         <button class="boton-principal" disabled="@enviando">@(enviando ? "Ingresando..." : "Ingresar")</button>
     </EditForm>
 </section>

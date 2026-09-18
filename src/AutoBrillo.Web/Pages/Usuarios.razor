@@ -76,11 +76,6 @@ else
             }
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(mensaje))
-        {
-            <dialog open><h2>Revisá los datos</h2><p>@mensaje</p><button @onclick="CerrarMensaje">Entendido</button></dialog>
-        }
-
         <div class="tabla-contenedor">
             <table>
                 <thead><tr><th>Id</th><th>Usuario</th><th>Roles asignados</th><th>Acciones</th></tr></thead>

@@ -20,6 +20,31 @@ public class ServicioAlertasTests
     }
 
     [Fact]
+    public async Task ConfirmarEliminarRol_muestra_dialogo_central_con_el_nombre_del_rol()
+    {
+        var javascript = new JavaScriptFalso(true);
+        var servicio = new ServicioAlertas(javascript);
+
+        var confirmado = await servicio.ConfirmarEliminarRolAsync("Caja");
+
+        Assert.True(confirmado);
+        Assert.Equal("autobrilloAlerta.confirmarEliminarRol", javascript.Identificador);
+        Assert.Equal("Caja", javascript.Argumentos[1]);
+    }
+
+    [Fact]
+    public async Task MostrarErrorGeneral_muestra_un_mensaje_central_con_titulo_y_detalle()
+    {
+        var javascript = new JavaScriptFalso(null);
+        var servicio = new ServicioAlertas(javascript);
+
+        await servicio.MostrarErrorGeneralAsync("Revisá los datos", "Las contraseñas no coinciden.");
+
+        Assert.Equal("autobrilloAlerta.mensajeError", javascript.Identificador);
+        Assert.Equal("Revisá los datos", javascript.Argumentos[0]);
+        Assert.Equal("Las contraseñas no coinciden.", javascript.Argumentos[1]);
+    }
+    [Fact]
     public async Task MostrarEliminacionExitosa_notifica_en_un_dialogo_central()
     {
         var javascript = new JavaScriptFalso(null);
@@ -31,6 +56,17 @@ public class ServicioAlertasTests
         Assert.Contains("María", javascript.Argumentos[0]?.ToString());
     }
 
+    [Fact]
+    public async Task MostrarEliminacionExitosa_envia_el_mensaje_recibido()
+    {
+        var javascript = new JavaScriptFalso(null);
+        var servicio = new ServicioAlertas(javascript);
+
+        await servicio.MostrarEliminacionExitosaAsync("El rol Caja fue eliminado correctamente.");
+
+        Assert.Equal("autobrilloAlerta.exito", javascript.Identificador);
+        Assert.Equal("El rol Caja fue eliminado correctamente.", javascript.Argumentos[0]);
+    }
     [Fact]
     public async Task MostrarErrorEliminar_notifica_el_error_en_un_dialogo_central()
     {

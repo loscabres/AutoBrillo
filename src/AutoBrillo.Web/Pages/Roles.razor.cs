@@ -8,8 +8,6 @@ public partial class Roles
     private bool cargando = true;
     private List<RolDto> roles = [];
     private RolDto edicion = new();
-    private RolDto? rolAEliminar;
-    private string? mensaje;
 
     protected override async Task OnInitializedAsync()
     {
@@ -20,21 +18,41 @@ public partial class Roles
     }
 
     private async Task CargarAsync() => roles = await Gestion.ObtenerRolesAsync() ?? [];
+
     private async Task Guardar()
     {
-        if (string.IsNullOrWhiteSpace(edicion.Descripcion)) { mensaje = "Escribí la descripción del rol."; return; }
-        mensaje = await Gestion.GuardarRolAsync(edicion);
-        if (mensaje is null) { Cancelar(); await CargarAsync(); }
+        if (string.IsNullOrWhiteSpace(edicion.Descripcion))
+        {
+            await Alertas.MostrarErrorGeneralAsync("Revisá los datos", "Escribí la descripción del rol.");
+            return;
+        }
+
+        var error = await Gestion.GuardarRolAsync(edicion);
+        if (error is not null)
+        {
+            await Alertas.MostrarErrorGeneralAsync("No se pudo guardar el rol", error);
+            return;
+        }
+
+        Cancelar();
+        await CargarAsync();
     }
-    private void Editar(RolDto rol) { edicion = new RolDto { Id_Roles = rol.Id_Roles, Descripcion = rol.Descripcion }; mensaje = null; }
-    private void Cancelar() { edicion = new(); mensaje = null; }
-    private void PedirEliminar(RolDto rol) { rolAEliminar = rol; mensaje = null; }
-    private void CancelarEliminar() => rolAEliminar = null;
-    private async Task EliminarConfirmado()
+
+    private void Editar(RolDto rol) => edicion = new RolDto { Id_Roles = rol.Id_Roles, Descripcion = rol.Descripcion };
+    private void Cancelar() => edicion = new();
+
+    private async Task Eliminar(RolDto rol)
     {
-        if (rolAEliminar is null) return;
-        mensaje = await Gestion.EliminarRolAsync(rolAEliminar.Id_Roles);
-        rolAEliminar = null;
-        if (mensaje is null) await CargarAsync();
+        if (!await Alertas.ConfirmarEliminarRolAsync(rol.Descripcion)) return;
+
+        var error = await Gestion.EliminarRolAsync(rol.Id_Roles);
+        if (error is not null)
+        {
+            await Alertas.MostrarErrorGeneralAsync("No se pudo eliminar el rol", error);
+            return;
+        }
+
+        await CargarAsync();
+        await Alertas.MostrarEliminacionExitosaAsync($"El rol {rol.Descripcion} fue eliminado correctamente.");
     }
 }

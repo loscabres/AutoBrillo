@@ -14,9 +14,6 @@ public partial class Login
     // Referencia al input Usuario para colocar el cursor allí al abrir la pantalla.
     private ElementReference campoUsuario;
 
-    // Mensaje visible si la API rechaza el acceso.
-    private string? error;
-
     // Evita que el usuario presione Ingresar varias veces mientras llega la respuesta.
     private bool enviando;
 
@@ -37,12 +34,17 @@ public partial class Login
     private async Task Ingresar()
     {
         enviando = true;
-        error = await Autenticacion.LoginAsync(credenciales.Nombre, credenciales.Password);
+        var error = await Autenticacion.LoginAsync(credenciales.Nombre, credenciales.Password);
         enviando = false;
 
         // Null significa que LoginAsync recibió un token correcto de la API.
         if (error is null)
+        {
             Navegacion.NavigateTo("inicio", forceLoad: true);
+            return;
+        }
+
+        await Alertas.MostrarErrorGeneralAsync("No se pudo ingresar", error);
     }
 
     /// <summary>Modelo sencillo que representa los datos escritos en el formulario.</summary>

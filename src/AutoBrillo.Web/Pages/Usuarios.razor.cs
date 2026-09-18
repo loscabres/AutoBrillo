@@ -11,7 +11,6 @@ public partial class Usuarios
     private UsuarioEdicionDto edicion = new();
     private string confirmacionPassword = string.Empty;
     private bool mostrarPasswords;
-    private string? mensaje;
 
     protected override async Task OnInitializedAsync()
     {
@@ -26,34 +25,57 @@ public partial class Usuarios
         usuarios = await Gestion.ObtenerUsuariosAsync() ?? [];
         roles = await Gestion.ObtenerRolesAsync() ?? [];
     }
+
     private async Task Guardar()
     {
         if (string.IsNullOrWhiteSpace(edicion.Nombre) || edicion.Id_Roles.Count == 0 || (edicion.Id_Usuarios == 0 && string.IsNullOrWhiteSpace(edicion.Password)))
-        { mensaje = "Completá nombre, contraseña y al menos un rol."; return; }
+        {
+            await Alertas.MostrarErrorGeneralAsync("Revisá los datos", "Completá nombre, contraseña y al menos un rol.");
+            return;
+        }
+
         var modificoPassword = edicion.Id_Usuarios == 0 || !string.IsNullOrWhiteSpace(edicion.Password) || !string.IsNullOrWhiteSpace(confirmacionPassword);
         if (modificoPassword && !ValidadorPasswordUsuario.Coinciden(edicion.Password, confirmacionPassword))
-        { mensaje = "Las contraseñas no coinciden. Revisalas e intentá de nuevo."; return; }
-        mensaje = await Gestion.GuardarUsuarioAsync(edicion);
-        if (mensaje is null) { Cancelar(); await CargarAsync(); }
+        {
+            await Alertas.MostrarErrorGeneralAsync("Revisá los datos", "Las contraseñas no coinciden. Revisalas e intentá de nuevo.");
+            return;
+        }
+
+        var error = await Gestion.GuardarUsuarioAsync(edicion);
+        if (error is not null)
+        {
+            await Alertas.MostrarErrorGeneralAsync("No se pudo guardar el usuario", error);
+            return;
+        }
+
+        Cancelar();
+        await CargarAsync();
     }
+
     private void Editar(UsuarioDto usuario)
     {
         edicion = new UsuarioEdicionDto { Id_Usuarios = usuario.Id_Usuarios, Nombre = usuario.Nombre, Id_Roles = [.. usuario.Id_Roles] };
         confirmacionPassword = string.Empty;
         mostrarPasswords = false;
-        mensaje = null;
     }
+
     private bool EstaSeleccionado(int idRol) => edicion.Id_Roles.Contains(idRol);
+
     private void CambiarRol(int idRol)
     {
         if (EstaSeleccionado(idRol)) edicion.Id_Roles.Remove(idRol);
         else edicion.Id_Roles.Add(idRol);
     }
-    private void Cancelar() { edicion = new(); confirmacionPassword = string.Empty; mostrarPasswords = false; mensaje = null; }
-    private void CerrarMensaje() => mensaje = null;
+
+    private void Cancelar()
+    {
+        edicion = new();
+        confirmacionPassword = string.Empty;
+        mostrarPasswords = false;
+    }
+
     private async Task Eliminar(UsuarioDto usuario)
     {
-        mensaje = null;
         if (!await Alertas.ConfirmarEliminarUsuarioAsync(usuario.Nombre)) return;
 
         var error = await Gestion.EliminarUsuarioAsync(usuario.Id_Usuarios);
@@ -64,6 +86,6 @@ public partial class Usuarios
         }
 
         await CargarAsync();
-        await Alertas.MostrarEliminacionExitosaAsync(usuario.Nombre);
+        await Alertas.MostrarEliminacionExitosaAsync($"El usuario {usuario.Nombre} fue eliminado correctamente.");
     }
 }

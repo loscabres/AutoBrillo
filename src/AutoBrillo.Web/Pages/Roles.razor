@@ -1,6 +1,7 @@
 @page "/roles"
 @inject ServicioAutenticacion Autenticacion
 @inject ServicioGestion Gestion
+@inject ServicioAlertas Alertas
 @inject NavigationManager Navegacion
 
 <PageTitle>Roles | AutoBrillo</PageTitle>
@@ -19,19 +20,14 @@ else
             <button @onclick="Guardar">@(edicion.Id_Roles == 0 ? "Agregar rol" : "Guardar cambios")</button>
             @if (edicion.Id_Roles != 0) { <button class="secundario" @onclick="Cancelar">Cancelar</button> }
         </div>
-        @if (!string.IsNullOrWhiteSpace(mensaje)) { <p class="mensaje">@mensaje</p> }
         <table>
             <thead><tr><th>Id</th><th>Descripción</th><th>Acciones</th></tr></thead>
             <tbody>
                 @foreach (var rol in roles)
                 {
-                    <tr><td>@rol.Id_Roles</td><td>@rol.Descripcion</td><td><button class="secundario" @onclick="() => Editar(rol)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(rol)">Eliminar</button></td></tr>
+                    <tr><td>@rol.Id_Roles</td><td>@rol.Descripcion</td><td><button class="secundario" @onclick="() => Editar(rol)">Editar</button> <button class="peligro" @onclick="() => Eliminar(rol)">Eliminar</button></td></tr>
                 }
             </tbody>
         </table>
     </section>
-    @if (rolAEliminar is not null)
-    {
-        <dialog open><h2>¿Eliminar rol?</h2><p>Se eliminará <strong>@rolAEliminar.Descripcion</strong>. Solo es posible si ningún usuario lo utiliza.</p><button class="peligro" @onclick="EliminarConfirmado">Eliminar</button><button class="secundario" @onclick="CancelarEliminar">Cancelar</button></dialog>
-    }
 }
