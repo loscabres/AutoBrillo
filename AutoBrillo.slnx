@@ -5,4 +5,7 @@
     <Project Path="src/AutoBrillo.Repository/AutoBrillo.Repository.csproj" />
     <Project Path="src/AutoBrillo.Web/AutoBrillo.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AutoBrillo.Web.Tests/AutoBrillo.Web.Tests.csproj" />
+  </Folder>
 </Solution>

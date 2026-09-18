@@ -9,7 +9,6 @@ public partial class Usuarios
     private List<UsuarioDto> usuarios = [];
     private List<RolDto> roles = [];
     private UsuarioEdicionDto edicion = new();
-    private UsuarioDto? usuarioAEliminar;
     private string? mensaje;
 
     protected override async Task OnInitializedAsync()
@@ -45,13 +44,19 @@ public partial class Usuarios
     }
     private void Cancelar() { edicion = new(); mensaje = null; }
     private void CerrarMensaje() => mensaje = null;
-    private void PedirEliminar(UsuarioDto usuario) { usuarioAEliminar = usuario; mensaje = null; }
-    private void CancelarEliminar() => usuarioAEliminar = null;
-    private async Task EliminarConfirmado()
+    private async Task Eliminar(UsuarioDto usuario)
     {
-        if (usuarioAEliminar is null) return;
-        mensaje = await Gestion.EliminarUsuarioAsync(usuarioAEliminar.Id_Usuarios);
-        usuarioAEliminar = null;
-        if (mensaje is null) await CargarAsync();
+        mensaje = null;
+        if (!await Alertas.ConfirmarEliminarUsuarioAsync(usuario.Nombre)) return;
+
+        var error = await Gestion.EliminarUsuarioAsync(usuario.Id_Usuarios);
+        if (error is not null)
+        {
+            await Alertas.MostrarErrorEliminarAsync(error);
+            return;
+        }
+
+        await CargarAsync();
+        await Alertas.MostrarEliminacionExitosaAsync(usuario.Nombre);
     }
 }

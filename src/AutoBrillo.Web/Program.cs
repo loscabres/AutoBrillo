@@ -20,6 +20,7 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiUrl) }
 // Registra el servicio que concentra las acciones de login, validación y cierre de sesión.
 builder.Services.AddScoped<ServicioAutenticacion>();
 builder.Services.AddScoped<ServicioGestion>();
+builder.Services.AddScoped<ServicioAlertas>();
 
 // Construye e inicia la aplicación en el navegador.
 await builder.Build().RunAsync();

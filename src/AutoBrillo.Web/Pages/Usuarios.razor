@@ -1,6 +1,7 @@
 @page "/usuarios"
 @inject ServicioAutenticacion Autenticacion
 @inject ServicioGestion Gestion
+@inject ServicioAlertas Alertas
 @inject NavigationManager Navegacion
 
 <PageTitle>Usuarios | AutoBrillo</PageTitle>
@@ -77,15 +78,10 @@ else
                 <tbody>
                     @foreach (var usuario in usuarios)
                     {
-                        <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@string.Join(", ", usuario.Roles)</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => PedirEliminar(usuario)">Eliminar</button></td></tr>
+                        <tr><td>@usuario.Id_Usuarios</td><td>@usuario.Nombre</td><td>@string.Join(", ", usuario.Roles)</td><td><button class="secundario" @onclick="() => Editar(usuario)">Editar</button> <button class="peligro" @onclick="() => Eliminar(usuario)">Eliminar</button></td></tr>
                     }
                 </tbody>
             </table>
         </div>
     </section>
-
-    @if (usuarioAEliminar is not null)
-    {
-        <dialog open><h2>¿Eliminar usuario?</h2><p>Se eliminará el usuario <strong>@usuarioAEliminar.Nombre</strong>.</p><button class="peligro" @onclick="EliminarConfirmado">Eliminar</button><button class="secundario" @onclick="CancelarEliminar">Cancelar</button></dialog>
-    }
 }
