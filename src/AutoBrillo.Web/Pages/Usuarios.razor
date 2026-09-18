@@ -27,18 +27,33 @@ else
                 <label for="nombre-usuario">Nombre de usuario</label>
                 <input id="nombre-usuario" @bind="edicion.Nombre" placeholder="Ej.: María González" maxlength="100" />
             </div>
-            <div class="campo-usuario">
+            <div class="campo-usuario campo-password">
                 <label for="password-usuario">@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")</label>
-                <input id="password-usuario" @bind="edicion.Password" type="@(mostrarPasswords ? "text" : "password")" placeholder="Mínimo 6 caracteres" />
+                <div class="entrada-con-accion">
+                    <input id="password-usuario" @bind="edicion.Password" type="@(mostrarPasswords ? "text" : "password")" placeholder="Mínimo 6 caracteres" />
+                    <button type="button" class="alternar-password" @onclick="() => mostrarPasswords = !mostrarPasswords" aria-label="@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")" title="@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")" aria-pressed="@mostrarPasswords">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="2.5" />
+                            @if (mostrarPasswords) { <path d="M4 4l16 16" /> }
+                        </svg>
+                        <span class="lector-pantalla">@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")</span>
+                    </button>
+                </div>
             </div>
-            <div class="campo-usuario">
+            <div class="campo-usuario campo-password">
                 <label for="confirmar-password-usuario">Confirmar contraseña</label>
-                <input id="confirmar-password-usuario" @bind="confirmacionPassword" type="@(mostrarPasswords ? "text" : "password")" placeholder="Repetí la contraseña" />
-            </div>
-            <div class="campo-usuario campo-ver-password">
-                <button type="button" class="secundario" @onclick="() => mostrarPasswords = !mostrarPasswords" aria-pressed="@mostrarPasswords">
-                    @(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")
-                </button>
+                <div class="entrada-con-accion">
+                    <input id="confirmar-password-usuario" @bind="confirmacionPassword" type="@(mostrarPasswords ? "text" : "password")" placeholder="Repetí la contraseña" />
+                    <button type="button" class="alternar-password" @onclick="() => mostrarPasswords = !mostrarPasswords" aria-label="@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")" title="@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")" aria-pressed="@mostrarPasswords">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="2.5" />
+                            @if (mostrarPasswords) { <path d="M4 4l16 16" /> }
+                        </svg>
+                        <span class="lector-pantalla">@(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")</span>
+                    </button>
+                </div>
             </div>
         </div>
 
