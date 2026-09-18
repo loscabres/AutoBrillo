@@ -29,7 +29,16 @@ else
             </div>
             <div class="campo-usuario">
                 <label for="password-usuario">@(edicion.Id_Usuarios == 0 ? "Contraseña" : "Nueva contraseña (opcional)")</label>
-                <input id="password-usuario" @bind="edicion.Password" type="password" placeholder="Mínimo 6 caracteres" />
+                <input id="password-usuario" @bind="edicion.Password" type="@(mostrarPasswords ? "text" : "password")" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div class="campo-usuario">
+                <label for="confirmar-password-usuario">Confirmar contraseña</label>
+                <input id="confirmar-password-usuario" @bind="confirmacionPassword" type="@(mostrarPasswords ? "text" : "password")" placeholder="Repetí la contraseña" />
+            </div>
+            <div class="campo-usuario campo-ver-password">
+                <button type="button" class="secundario" @onclick="() => mostrarPasswords = !mostrarPasswords" aria-pressed="@mostrarPasswords">
+                    @(mostrarPasswords ? "Ocultar contraseñas" : "Ver contraseñas")
+                </button>
             </div>
         </div>
 
