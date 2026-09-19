@@ -25,7 +25,18 @@ else
             <tbody>
                 @foreach (var rol in roles)
                 {
-                    <tr><td>@rol.Id_Roles</td><td>@rol.Descripcion</td><td><button class="secundario" @onclick="() => Editar(rol)">Editar</button> <button class="peligro" @onclick="() => Eliminar(rol)">Eliminar</button></td></tr>
+                    <tr>
+                        <td>@rol.Id_Roles</td>
+                        <td>@rol.Descripcion</td>
+                        <td class="acciones-tabla">
+                            <button type="button" class="boton-icono secundario" @onclick="() => Editar(rol)" aria-label="Editar rol" title="Editar rol">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Z" /><path d="m12.5 7.5 4 4" /></svg>
+                            </button>
+                            <button type="button" class="boton-icono peligro" @onclick="() => Eliminar(rol)" aria-label="Eliminar rol" title="Eliminar rol">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v5M14 11v5" /></svg>
+                            </button>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
