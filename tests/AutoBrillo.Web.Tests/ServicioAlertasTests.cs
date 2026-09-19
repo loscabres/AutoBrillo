@@ -33,6 +33,19 @@ public class ServicioAlertasTests
     }
 
     [Fact]
+    public async Task ConfirmarAgregarRol_muestra_dialogo_central_con_la_descripcion()
+    {
+        var javascript = new JavaScriptFalso(true);
+        var servicio = new ServicioAlertas(javascript);
+
+        var confirmado = await servicio.ConfirmarAgregarRolAsync("Recepción");
+
+        Assert.True(confirmado);
+        Assert.Equal("autobrilloAlerta.confirmarAgregarRol", javascript.Identificador);
+        Assert.Equal("Recepción", javascript.Argumentos[1]);
+    }
+
+    [Fact]
     public async Task MostrarErrorGeneral_muestra_un_mensaje_central_con_titulo_y_detalle()
     {
         var javascript = new JavaScriptFalso(null);

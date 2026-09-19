@@ -27,6 +27,11 @@ public partial class Roles
             return;
         }
 
+        if (edicion.Id_Roles == 0 && !await Alertas.ConfirmarAgregarRolAsync(edicion.Descripcion))
+        {
+            return;
+        }
+
         var error = await Gestion.GuardarRolAsync(edicion);
         if (error is not null)
         {

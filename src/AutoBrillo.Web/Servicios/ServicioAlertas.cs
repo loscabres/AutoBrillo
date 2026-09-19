@@ -17,6 +17,12 @@ public class ServicioAlertas(IJSRuntime javascript)
             "¿Eliminar rol?",
             descripcion);
 
+    public ValueTask<bool> ConfirmarAgregarRolAsync(string descripcion)
+        => javascript.InvokeAsync<bool>(
+            "autobrilloAlerta.confirmarAgregarRol",
+            "¿Agregar rol?",
+            descripcion);
+
     public ValueTask MostrarErrorGeneralAsync(string titulo, string detalle)
         => javascript.InvokeVoidAsync("autobrilloAlerta.mensajeError", titulo, detalle);
 

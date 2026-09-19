@@ -30,6 +30,19 @@ window.autobrilloAlerta = {
         });
         return resultado.isConfirmed;
     },
+    confirmarAgregarRol: async (titulo, descripcion) => {
+        const resultado = await Swal.fire({
+            title: titulo,
+            text: `Se agregará el rol ${descripcion}.`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, agregar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            focusCancel: true
+        });
+        return resultado.isConfirmed;
+    },
     mensajeError: (titulo, mensaje) => Swal.fire({
         title: titulo,
         text: mensaje,
