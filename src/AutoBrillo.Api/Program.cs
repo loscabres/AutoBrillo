@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using AutoBrillo.Repository.Datos;
 using AutoBrillo.Repository.Repositorios;
@@ -54,6 +55,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(1)
+    };
+
+    // La cuenta se consulta en cada solicitud autenticada: desactivarla invalida sesiones JWT ya emitidas.
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async contexto =>
+        {
+            try
+            {
+                var idTexto = contexto.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idTexto, out var idUsuario))
+                {
+                    contexto.Fail("Token sin identificador de usuario válido.");
+                    return;
+                }
+
+                var repositorio = contexto.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                var usuario = await repositorio.ObtenerPorIdAsync(idUsuario, contexto.HttpContext.RequestAborted);
+                if (usuario is null || !usuario.Activo)
+                    contexto.Fail("El usuario no está habilitado.");
+            }
+            catch
+            {
+                // Ante un fallo al consultar la cuenta no se permite continuar con una sesión no verificable.
+                contexto.Fail("No fue posible validar el estado del usuario.");
+            }
+        }
     };
 });
 builder.Services.AddAuthorization();

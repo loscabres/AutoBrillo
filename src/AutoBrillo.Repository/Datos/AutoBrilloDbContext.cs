@@ -41,6 +41,9 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
         // Password es obligatorio y guarda el hash BCrypt, no el texto original.
         usuario.Property(x => x.Password).HasColumnName("Password").IsRequired();
 
+        // Activo controla el acceso: los nuevos usuarios se crean habilitados.
+        usuario.Property(x => x.Activo).HasColumnName("Activo").HasDefaultValue(true).IsRequired();
+
         // Un usuario puede tener varios roles y cada rol puede pertenecer a varios usuarios.
         // La tabla intermedia usuarios_roles guarda cada asignación sin duplicados.
         usuario.HasMany(x => x.Roles)

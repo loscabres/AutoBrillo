@@ -74,6 +74,22 @@ public partial class Usuarios
         mostrarPasswords = false;
     }
 
+    private async Task CambiarEstado(UsuarioDto usuario)
+    {
+        var nuevoEstado = !usuario.Activo;
+        var accion = nuevoEstado ? "activar" : "desactivar";
+        if (!await Alertas.ConfirmarCambioEstadoUsuarioAsync(accion, usuario.Nombre)) return;
+
+        var error = await Gestion.CambiarEstadoUsuarioAsync(usuario.Id_Usuarios, nuevoEstado);
+        if (error is not null)
+        {
+            await Alertas.MostrarErrorGeneralAsync($"No se pudo {accion} el usuario", error);
+            return;
+        }
+
+        await CargarAsync();
+    }
+
     private async Task Eliminar(UsuarioDto usuario)
     {
         if (!await Alertas.ConfirmarEliminarUsuarioAsync(usuario.Nombre)) return;

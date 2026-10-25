@@ -61,8 +61,8 @@ public class AuthController(IUserRepository usuarios, IRolRepository roles, Pass
         // Busca primero al usuario por Nombre.
         var usuario = await usuarios.ObtenerPorNombreAsync(request.Nombre.Trim(), cancellationToken);
 
-        // Si no existe o BCrypt no valida la contraseña, no se revela cuál de los dos datos falló.
-        if (usuario is null || !passwordHasher.Verificar(request.Password, usuario.Password))
+        // Si no existe, está desactivado o BCrypt no valida la contraseña, no se revela cuál de los datos falló.
+        if (usuario is null || !usuario.Activo || !passwordHasher.Verificar(request.Password, usuario.Password))
             return Unauthorized(new { mensaje = "Nombre o contraseña incorrectos." });
 
         // El token permite acceder posteriormente a endpoints marcados con [Authorize].

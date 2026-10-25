@@ -12,5 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/AutoBrillo.Web/AutoBrillo.Web.csproj" />
+    <ProjectReference Include="../../src/AutoBrillo.Model/AutoBrillo.Model.csproj" />
+    <ProjectReference Include="../../src/AutoBrillo.Api/AutoBrillo.Api.csproj" />
   </ItemGroup>
 </Project>

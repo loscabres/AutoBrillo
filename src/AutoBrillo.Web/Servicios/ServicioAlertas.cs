@@ -5,6 +5,12 @@ namespace AutoBrillo.Web.Servicios;
 /// <summary>Centraliza confirmaciones y resultados visuales de eliminación.</summary>
 public class ServicioAlertas(IJSRuntime javascript)
 {
+    public ValueTask<bool> ConfirmarCambioEstadoUsuarioAsync(string accion, string nombre)
+        => javascript.InvokeAsync<bool>(
+            "autobrilloAlerta.confirmarEliminar",
+            $"¿{accion[..1].ToUpper()}{accion[1..]} usuario?",
+            nombre);
+
     public ValueTask<bool> ConfirmarEliminarUsuarioAsync(string nombre)
         => javascript.InvokeAsync<bool>(
             "autobrilloAlerta.confirmarEliminar",

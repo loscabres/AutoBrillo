@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoBrillo.Api.Contratos;
 using AutoBrillo.Model.Entidades;
 using AutoBrillo.Repository.Repositorios;
@@ -61,6 +62,22 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
         return Ok(Convertir(usuario));
     }
 
+    [HttpPatch("{id:int}/estado")]
+    public async Task<IActionResult> CambiarEstado(int id, EstadoUsuarioRequest request, CancellationToken cancellationToken)
+    {
+        var usuario = await usuarios.ObtenerPorIdAsync(id, cancellationToken);
+        if (usuario is null) return NotFound(new { mensaje = "Usuario no encontrado." });
+
+        var idAdministradorActual = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!request.Activo && idAdministradorActual == id.ToString())
+            return BadRequest(new { mensaje = "No podés desactivar tu propio usuario." });
+
+        usuario.Activo = request.Activo;
+        await usuarios.GuardarCambiosAsync(cancellationToken);
+        usuario = await usuarios.ObtenerPorIdAsync(id, cancellationToken) ?? usuario;
+        return Ok(Convertir(usuario));
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
     {
@@ -89,5 +106,6 @@ public class UsuariosController(IUserRepository usuarios, IRolRepository roles, 
         usuario.Id_Usuarios,
         usuario.Nombre,
         usuario.Roles.Select(x => x.Id_Roles).ToList(),
-        usuario.Roles.OrderBy(x => x.Descripcion).Select(x => x.Descripcion).ToList());
+        usuario.Roles.OrderBy(x => x.Descripcion).Select(x => x.Descripcion).ToList(),
+        usuario.Activo);
 }

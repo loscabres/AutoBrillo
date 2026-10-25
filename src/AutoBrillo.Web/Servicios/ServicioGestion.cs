@@ -29,6 +29,9 @@ public class ServicioGestion(HttpClient http)
 
     public async Task<string?> EliminarUsuarioAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/usuarios/{id}"));
 
+    public async Task<string?> CambiarEstadoUsuarioAsync(int id, bool activo) =>
+        await LeerErrorAsync(await http.PatchAsJsonAsync($"api/usuarios/{id}/estado", new { activo }));
+
     private static async Task<string?> LeerErrorAsync(HttpResponseMessage respuesta)
     {
         if (respuesta.IsSuccessStatusCode) return null;
@@ -56,7 +59,7 @@ public class RolDto
     public string Descripcion { get; set; } = string.Empty;
 }
 
-public record UsuarioDto(int Id_Usuarios, string Nombre, List<int> Id_Roles, List<string> Roles);
+public record UsuarioDto(int Id_Usuarios, string Nombre, List<int> Id_Roles, List<string> Roles, bool Activo = true);
 public class UsuarioEdicionDto
 {
     public int Id_Usuarios { get; set; }

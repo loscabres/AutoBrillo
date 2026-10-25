@@ -12,6 +12,9 @@ public class Usuario
     /// <summary>Hash BCrypt de la contraseña. Nunca guarda la contraseña original.</summary>
     public string Password { get; set; } = string.Empty;
 
+    /// <summary>Indica si el usuario puede iniciar sesión y usar la aplicación.</summary>
+    public bool Activo { get; set; } = true;
+
     /// <summary>Roles asignados al usuario mediante la tabla intermedia usuarios_roles.</summary>
     public List<Rol> Roles { get; set; } = [];
 }
