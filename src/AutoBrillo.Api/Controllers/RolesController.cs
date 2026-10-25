@@ -13,8 +13,8 @@ namespace AutoBrillo.Api.Controllers;
 public class RolesController(IRolRepository roles) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<Rol>>> ObtenerTodos(CancellationToken cancellationToken) =>
-        Ok(await roles.ObtenerTodosAsync(cancellationToken));
+    public async Task<ActionResult<List<RolResponse>>> ObtenerTodos(CancellationToken cancellationToken) =>
+        Ok((await roles.ObtenerTodosAsync(cancellationToken)).Select(Convertir).ToList());
 
     [HttpPost]
     public async Task<IActionResult> Crear(RolRequest request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class RolesController(IRolRepository roles) : ControllerBase
         var rol = new Rol { Descripcion = descripcion };
         await roles.AgregarAsync(rol, cancellationToken);
         await roles.GuardarCambiosAsync(cancellationToken);
-        return CreatedAtAction(nameof(ObtenerTodos), new { rol.Id_Roles }, rol);
+        return CreatedAtAction(nameof(ObtenerTodos), new { rol.Id_Roles }, Convertir(rol));
     }
 
     [HttpPut("{id:int}")]
@@ -41,7 +41,7 @@ public class RolesController(IRolRepository roles) : ControllerBase
 
         rol.Descripcion = descripcion;
         await roles.GuardarCambiosAsync(cancellationToken);
-        return Ok(rol);
+        return Ok(Convertir(rol));
     }
 
     [HttpDelete("{id:int}")]
@@ -56,4 +56,6 @@ public class RolesController(IRolRepository roles) : ControllerBase
         await roles.GuardarCambiosAsync(cancellationToken);
         return NoContent();
     }
+
+    private static RolResponse Convertir(Rol rol) => new(rol.Id_Roles, rol.Descripcion);
 }
