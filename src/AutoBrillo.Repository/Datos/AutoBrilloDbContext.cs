@@ -19,6 +19,12 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
     /// <summary>Representa la tabla roles dentro del código.</summary>
     public DbSet<Rol> Roles => Set<Rol>();
 
+    /// <summary>Representa la tabla personas dentro del código.</summary>
+    public DbSet<Persona> Personas => Set<Persona>();
+
+    /// <summary>Representa el catálogo de tipos de personas.</summary>
+    public DbSet<TipoPersona> TiposPersonas => Set<TipoPersona>();
+
     /// <summary>
     /// Configura cómo se relaciona Usuario con la tabla real de la base de datos.
     /// Se ejecuta cuando EF Core construye su modelo interno.
@@ -66,5 +72,35 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
         rol.Property(x => x.Id_Roles).HasColumnName("Id_Roles");
         rol.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(100).IsRequired();
         rol.HasIndex(x => x.Descripcion).IsUnique();
+
+        var persona = modelBuilder.Entity<Persona>();
+        persona.ToTable("personas");
+        persona.HasKey(x => x.Id_Personas);
+        persona.Property(x => x.Id_Personas).HasColumnName("Id_Personas");
+        persona.Property(x => x.Nombre).HasColumnName("Nombre").HasMaxLength(150).IsRequired();
+        persona.Property(x => x.Documento).HasColumnName("Documento").HasMaxLength(50).IsRequired();
+        persona.Property(x => x.Telefono).HasColumnName("Telefono").HasMaxLength(30);
+        persona.Property(x => x.Activo).HasColumnName("Activo").HasDefaultValue(true).IsRequired();
+        persona.HasIndex(x => x.Documento).IsUnique();
+        persona.HasMany(x => x.Tipos)
+            .WithMany(x => x.Personas)
+            .UsingEntity<Dictionary<string, object>>(
+                "personas_tipos",
+                relacion => relacion.HasOne<TipoPersona>().WithMany().HasForeignKey("Id_Tipos_Personas").OnDelete(DeleteBehavior.Restrict),
+                relacion => relacion.HasOne<Persona>().WithMany().HasForeignKey("Id_Personas").OnDelete(DeleteBehavior.Cascade),
+                relacion =>
+                {
+                    relacion.ToTable("personas_tipos");
+                    relacion.HasKey("Id_Personas", "Id_Tipos_Personas");
+                    relacion.IndexerProperty<int>("Id_Personas").HasColumnName("Id_Personas");
+                    relacion.IndexerProperty<int>("Id_Tipos_Personas").HasColumnName("Id_Tipos_Personas");
+                });
+
+        var tipoPersona = modelBuilder.Entity<TipoPersona>();
+        tipoPersona.ToTable("tipos_personas");
+        tipoPersona.HasKey(x => x.Id_Tipos_Personas);
+        tipoPersona.Property(x => x.Id_Tipos_Personas).HasColumnName("Id_Tipos_Personas");
+        tipoPersona.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(100).IsRequired();
+        tipoPersona.HasIndex(x => x.Descripcion).IsUnique();
     }
 }

@@ -7,6 +7,8 @@ public class ServicioGestion(HttpClient http)
 {
     public Task<List<RolDto>?> ObtenerRolesAsync() => http.GetFromJsonAsync<List<RolDto>>("api/roles");
     public Task<List<UsuarioDto>?> ObtenerUsuariosAsync() => http.GetFromJsonAsync<List<UsuarioDto>>("api/usuarios");
+    public Task<List<PersonaDto>?> ObtenerPersonasAsync() => http.GetFromJsonAsync<List<PersonaDto>>("api/personas");
+    public Task<List<TipoPersonaDto>?> ObtenerTiposPersonasAsync() => http.GetFromJsonAsync<List<TipoPersonaDto>>("api/tipos-personas");
 
     public async Task<string?> GuardarRolAsync(RolDto rol)
     {
@@ -31,6 +33,30 @@ public class ServicioGestion(HttpClient http)
 
     public async Task<string?> CambiarEstadoUsuarioAsync(int id, bool activo) =>
         await LeerErrorAsync(await http.PatchAsJsonAsync($"api/usuarios/{id}/estado", new { activo }));
+
+    public async Task<string?> GuardarPersonaAsync(PersonaEdicionDto persona)
+    {
+        var datos = new { nombre = persona.Nombre, documento = persona.Documento, telefono = persona.Telefono, id_Tipos_Personas = persona.Id_Tipos_Personas };
+        var respuesta = persona.Id_Personas == 0
+            ? await http.PostAsJsonAsync("api/personas", datos)
+            : await http.PutAsJsonAsync($"api/personas/{persona.Id_Personas}", datos);
+        return await LeerErrorAsync(respuesta);
+    }
+
+    public async Task<string?> CambiarEstadoPersonaAsync(int id, bool activo) =>
+        await LeerErrorAsync(await http.PatchAsJsonAsync($"api/personas/{id}/estado", new { activo }));
+
+    public async Task<string?> EliminarPersonaAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/personas/{id}"));
+
+    public async Task<string?> GuardarTipoPersonaAsync(TipoPersonaDto tipo)
+    {
+        var respuesta = tipo.Id_Tipos_Personas == 0
+            ? await http.PostAsJsonAsync("api/tipos-personas", new { descripcion = tipo.Descripcion })
+            : await http.PutAsJsonAsync($"api/tipos-personas/{tipo.Id_Tipos_Personas}", new { descripcion = tipo.Descripcion });
+        return await LeerErrorAsync(respuesta);
+    }
+
+    public async Task<string?> EliminarTipoPersonaAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/tipos-personas/{id}"));
 
     private static async Task<string?> LeerErrorAsync(HttpResponseMessage respuesta)
     {
@@ -60,6 +86,32 @@ public class RolDto
 }
 
 public record UsuarioDto(int Id_Usuarios, string Nombre, List<int> Id_Roles, List<string> Roles, bool Activo = true);
+public class PersonaDto
+{
+    public int Id_Personas { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string Documento { get; set; } = string.Empty;
+    public string? Telefono { get; set; }
+    public bool Activo { get; set; }
+    public List<int> Id_Tipos_Personas { get; set; } = [];
+    public List<string> Tipos { get; set; } = [];
+}
+
+public class PersonaEdicionDto
+{
+    public int Id_Personas { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string Documento { get; set; } = string.Empty;
+    public string? Telefono { get; set; }
+    public List<int> Id_Tipos_Personas { get; set; } = [];
+}
+
+public class TipoPersonaDto
+{
+    public int Id_Tipos_Personas { get; set; }
+    public string Descripcion { get; set; } = string.Empty;
+}
+
 public class UsuarioEdicionDto
 {
     public int Id_Usuarios { get; set; }
