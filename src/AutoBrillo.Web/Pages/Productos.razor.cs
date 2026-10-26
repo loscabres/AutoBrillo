@@ -1,5 +1,4 @@
 using AutoBrillo.Web.Servicios;
-using Microsoft.AspNetCore.Components;
 
 namespace AutoBrillo.Web.Pages;
 
@@ -20,21 +19,14 @@ public partial class Productos
 
     private async Task CargarAsync() { productos = await Gestion.ObtenerProductosAsync() ?? []; tipos = await Gestion.ObtenerTiposProductosAsync() ?? []; }
     private bool TipoSeleccionado(int id) => edicion.Id_Tipos_Productos.Contains(id);
+    private string TextoTiposSeleccionados => edicion.Id_Tipos_Productos.Count == 0
+        ? "Seleccionar tipos"
+        : string.Join(", ", tipos.Where(tipo => TipoSeleccionado(tipo.Id_Tipos_Productos)).Select(tipo => tipo.Descripcion));
 
-    private void SeleccionarTipos(ChangeEventArgs evento)
+    private void CambiarTipo(int id)
     {
-        var valores = evento.Value switch
-        {
-            string[] seleccionados => seleccionados,
-            string seleccionado => [seleccionado],
-            _ => []
-        };
-
-        edicion.Id_Tipos_Productos = valores
-            .Select(valor => int.TryParse(valor, out var id) ? id : 0)
-            .Where(id => id > 0)
-            .Distinct()
-            .ToList();
+        if (TipoSeleccionado(id)) edicion.Id_Tipos_Productos.Remove(id);
+        else edicion.Id_Tipos_Productos.Add(id);
     }
 
     private async Task GuardarProducto()
