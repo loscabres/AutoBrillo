@@ -15,10 +15,19 @@ else
     <section class="panel-abm">
         <h1>Personas</h1>
         <p>Administrá clientes, funcionarios y proveedores desde una sola ficha.</p>
-        <div class="formulario-abm">
-            <input @bind="edicion.Nombre" placeholder="Nombre completo" maxlength="150" />
-            <input @bind="edicion.Documento" placeholder="Documento" maxlength="50" />
-            <input @bind="edicion.Telefono" placeholder="Teléfono" maxlength="30" />
+        <div class="formulario-abm formulario-abm-vertical">
+            <div class="campo-abm">
+                <label for="persona-nombre">Nombre completo</label>
+                <input id="persona-nombre" @bind="edicion.Nombre" placeholder="Ej.: Ana Gómez" maxlength="150" />
+            </div>
+            <div class="campo-abm">
+                <label for="persona-documento">Documento</label>
+                <input id="persona-documento" @bind="edicion.Documento" placeholder="Número de documento" maxlength="50" />
+            </div>
+            <div class="campo-abm">
+                <label for="persona-telefono">Teléfono</label>
+                <input id="persona-telefono" @bind="edicion.Telefono" placeholder="Número de teléfono" maxlength="30" inputmode="tel" />
+            </div>
         </div>
         <div class="grilla-roles">
             @foreach (var tipo in tipos)

@@ -11,11 +11,23 @@ else
     <section class="panel-abm">
         <h1>Productos y servicios</h1>
         <p>Registrá productos, insumos y servicios con sus precios y stock.</p>
-        <div class="formulario-abm">
-            <input @bind="edicion.Descripcion" placeholder="Descripción" maxlength="150" />
-            <input @bind="edicion.PrecioDeCosto" type="number" min="0" step="0.01" placeholder="Precio de costo" />
-            <input @bind="edicion.PrecioDeVenta" type="number" min="0" step="0.01" placeholder="Precio de venta" />
-            <input @bind="edicion.StockActual" type="number" min="0" step="0.01" placeholder="Stock actual" />
+        <div class="formulario-abm formulario-abm-vertical">
+            <div class="campo-abm">
+                <label for="producto-descripcion">Descripción</label>
+                <input id="producto-descripcion" @bind="edicion.Descripcion" placeholder="Ej.: Lavado completo" maxlength="150" />
+            </div>
+            <div class="campo-abm">
+                <label for="producto-costo">Precio de costo</label>
+                <input id="producto-costo" @bind="edicion.PrecioDeCosto" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
+            </div>
+            <div class="campo-abm">
+                <label for="producto-venta">Precio de venta</label>
+                <input id="producto-venta" @bind="edicion.PrecioDeVenta" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
+            </div>
+            <div class="campo-abm">
+                <label for="producto-stock">Stock actual</label>
+                <input id="producto-stock" @bind="edicion.StockActual" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
+            </div>
         </div>
         <div class="grilla-roles">
             @foreach (var tipo in tipos)
