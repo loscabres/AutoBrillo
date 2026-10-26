@@ -29,12 +29,15 @@ else
                 <input id="producto-stock" @bind="edicion.StockActual" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
             </div>
         </div>
-        <div class="grilla-roles">
-            @foreach (var tipo in tipos)
-            {
-                var seleccionado = TipoSeleccionado(tipo.Id_Tipos_Productos);
-                <label class="tarjeta-rol @(seleccionado ? "rol-seleccionado" : "")"><input type="checkbox" checked="@seleccionado" @onchange="() => CambiarTipo(tipo.Id_Tipos_Productos)" /><span class="detalle-rol"><small>TIPO</small><strong>@tipo.Descripcion</strong></span><span class="estado-rol">✓</span></label>
-            }
+        <div class="campo-abm selector-tipos-producto">
+            <label for="producto-tipos">Tipos de producto</label>
+            <select id="producto-tipos" multiple size="3" @onchange="SeleccionarTipos" aria-describedby="ayuda-tipos-producto">
+                @foreach (var tipo in tipos)
+                {
+                    <option value="@tipo.Id_Tipos_Productos" selected="@TipoSeleccionado(tipo.Id_Tipos_Productos)">@tipo.Descripcion</option>
+                }
+            </select>
+            <small id="ayuda-tipos-producto">Mantené presionado Ctrl (o ⌘ en Mac) para seleccionar varios tipos.</small>
         </div>
         <div class="acciones-formulario"><button @onclick="GuardarProducto">@(edicion.Id_Productos == 0 ? "Agregar producto" : "Guardar cambios")</button>@if (edicion.Id_Productos != 0) { <button class="secundario" @onclick="() => edicion = new()">Cancelar</button> }</div>
         <div class="tabla-contenedor"><table><thead><tr><th>Id</th><th>Descripción</th><th>Costo</th><th>Venta</th><th>Stock</th><th>Tipos</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
