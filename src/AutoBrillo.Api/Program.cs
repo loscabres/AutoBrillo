@@ -29,6 +29,8 @@ builder.Services.AddScoped<IUserRepository, RepositorioUsuarios>();
 builder.Services.AddScoped<IRolRepository, RepositorioRoles>();
 builder.Services.AddScoped<IPersonaRepository, RepositorioPersonas>();
 builder.Services.AddScoped<ITipoPersonaRepository, RepositorioTiposPersonas>();
+builder.Services.AddScoped<IProductoRepository, RepositorioProductos>();
+builder.Services.AddScoped<ITipoProductoRepository, RepositorioTiposProductos>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddControllers();
 

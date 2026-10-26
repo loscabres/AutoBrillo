@@ -9,6 +9,8 @@ public class ServicioGestion(HttpClient http)
     public Task<List<UsuarioDto>?> ObtenerUsuariosAsync() => http.GetFromJsonAsync<List<UsuarioDto>>("api/usuarios");
     public Task<List<PersonaDto>?> ObtenerPersonasAsync() => http.GetFromJsonAsync<List<PersonaDto>>("api/personas");
     public Task<List<TipoPersonaDto>?> ObtenerTiposPersonasAsync() => http.GetFromJsonAsync<List<TipoPersonaDto>>("api/tipos-personas");
+    public Task<List<ProductoDto>?> ObtenerProductosAsync() => http.GetFromJsonAsync<List<ProductoDto>>("api/productos");
+    public Task<List<TipoProductoDto>?> ObtenerTiposProductosAsync() => http.GetFromJsonAsync<List<TipoProductoDto>>("api/tipos-productos");
 
     public async Task<string?> GuardarRolAsync(RolDto rol)
     {
@@ -57,6 +59,24 @@ public class ServicioGestion(HttpClient http)
     }
 
     public async Task<string?> EliminarTipoPersonaAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/tipos-personas/{id}"));
+
+    public async Task<string?> GuardarProductoAsync(ProductoEdicionDto producto)
+    {
+        var datos = new { descripcion = producto.Descripcion, precioDeCosto = producto.PrecioDeCosto, precioDeVenta = producto.PrecioDeVenta, stockActual = producto.StockActual, id_Tipos_Productos = producto.Id_Tipos_Productos };
+        var respuesta = producto.Id_Productos == 0 ? await http.PostAsJsonAsync("api/productos", datos) : await http.PutAsJsonAsync($"api/productos/{producto.Id_Productos}", datos);
+        return await LeerErrorAsync(respuesta);
+    }
+
+    public async Task<string?> CambiarEstadoProductoAsync(int id, bool activo) => await LeerErrorAsync(await http.PatchAsJsonAsync($"api/productos/{id}/estado", new { activo }));
+    public async Task<string?> EliminarProductoAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/productos/{id}"));
+
+    public async Task<string?> GuardarTipoProductoAsync(TipoProductoDto tipo)
+    {
+        var respuesta = tipo.Id_Tipos_Productos == 0 ? await http.PostAsJsonAsync("api/tipos-productos", new { descripcion = tipo.Descripcion }) : await http.PutAsJsonAsync($"api/tipos-productos/{tipo.Id_Tipos_Productos}", new { descripcion = tipo.Descripcion });
+        return await LeerErrorAsync(respuesta);
+    }
+
+    public async Task<string?> EliminarTipoProductoAsync(int id) => await LeerErrorAsync(await http.DeleteAsync($"api/tipos-productos/{id}"));
 
     private static async Task<string?> LeerErrorAsync(HttpResponseMessage respuesta)
     {
@@ -110,6 +130,34 @@ public class TipoPersonaDto
 {
     public int Id_Tipos_Personas { get; set; }
     public string Descripcion { get; set; } = string.Empty;
+}
+
+public class TipoProductoDto
+{
+    public int Id_Tipos_Productos { get; set; }
+    public string Descripcion { get; set; } = string.Empty;
+}
+
+public class ProductoDto
+{
+    public int Id_Productos { get; set; }
+    public string Descripcion { get; set; } = string.Empty;
+    public decimal PrecioDeCosto { get; set; }
+    public decimal PrecioDeVenta { get; set; }
+    public bool Activo { get; set; }
+    public decimal StockActual { get; set; }
+    public List<int> Id_Tipos_Productos { get; set; } = [];
+    public List<string> Tipos { get; set; } = [];
+}
+
+public class ProductoEdicionDto
+{
+    public int Id_Productos { get; set; }
+    public string Descripcion { get; set; } = string.Empty;
+    public decimal PrecioDeCosto { get; set; }
+    public decimal PrecioDeVenta { get; set; }
+    public decimal StockActual { get; set; }
+    public List<int> Id_Tipos_Productos { get; set; } = [];
 }
 
 public class UsuarioEdicionDto

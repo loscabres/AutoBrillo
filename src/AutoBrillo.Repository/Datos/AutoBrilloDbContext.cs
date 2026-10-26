@@ -25,6 +25,12 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
     /// <summary>Representa el catálogo de tipos de personas.</summary>
     public DbSet<TipoPersona> TiposPersonas => Set<TipoPersona>();
 
+    /// <summary>Representa el registro de productos.</summary>
+    public DbSet<Producto> Productos => Set<Producto>();
+
+    /// <summary>Representa el catálogo de tipos de productos.</summary>
+    public DbSet<TipoProducto> TiposProductos => Set<TipoProducto>();
+
     /// <summary>
     /// Configura cómo se relaciona Usuario con la tabla real de la base de datos.
     /// Se ejecuta cuando EF Core construye su modelo interno.
@@ -102,5 +108,36 @@ public class AutoBrilloDbContext(DbContextOptions<AutoBrilloDbContext> options) 
         tipoPersona.Property(x => x.Id_Tipos_Personas).HasColumnName("Id_Tipos_Personas");
         tipoPersona.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(100).IsRequired();
         tipoPersona.HasIndex(x => x.Descripcion).IsUnique();
+
+        var producto = modelBuilder.Entity<Producto>();
+        producto.ToTable("productos");
+        producto.HasKey(x => x.Id_Productos);
+        producto.Property(x => x.Id_Productos).HasColumnName("Id_Productos");
+        producto.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(150).IsRequired();
+        producto.Property(x => x.PrecioDeCosto).HasColumnName("PrecioDeCosto").HasPrecision(18, 2).IsRequired();
+        producto.Property(x => x.PrecioDeVenta).HasColumnName("PrecioDeVenta").HasPrecision(18, 2).IsRequired();
+        producto.Property(x => x.Activo).HasColumnName("Activo").HasDefaultValue(true).IsRequired();
+        producto.Property(x => x.StockActual).HasColumnName("StockActual").HasPrecision(18, 2).IsRequired();
+        producto.HasIndex(x => x.Descripcion).IsUnique();
+        producto.HasMany(x => x.Tipos)
+            .WithMany(x => x.Productos)
+            .UsingEntity<Dictionary<string, object>>(
+                "productos_tipos",
+                relacion => relacion.HasOne<TipoProducto>().WithMany().HasForeignKey("Id_Tipos_Productos").OnDelete(DeleteBehavior.Restrict),
+                relacion => relacion.HasOne<Producto>().WithMany().HasForeignKey("Id_Productos").OnDelete(DeleteBehavior.Cascade),
+                relacion =>
+                {
+                    relacion.ToTable("productos_tipos");
+                    relacion.HasKey("Id_Productos", "Id_Tipos_Productos");
+                    relacion.IndexerProperty<int>("Id_Productos").HasColumnName("Id_Productos");
+                    relacion.IndexerProperty<int>("Id_Tipos_Productos").HasColumnName("Id_Tipos_Productos");
+                });
+
+        var tipoProducto = modelBuilder.Entity<TipoProducto>();
+        tipoProducto.ToTable("tipos_productos");
+        tipoProducto.HasKey(x => x.Id_Tipos_Productos);
+        tipoProducto.Property(x => x.Id_Tipos_Productos).HasColumnName("Id_Tipos_Productos");
+        tipoProducto.Property(x => x.Descripcion).HasColumnName("Descripcion").HasMaxLength(100).IsRequired();
+        tipoProducto.HasIndex(x => x.Descripcion).IsUnique();
     }
 }
