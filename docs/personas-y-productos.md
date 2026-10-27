@@ -161,5 +161,8 @@ Las tablas están definidas en migraciones versionadas, aplicadas en el proyecto
 - `20261025100000_crear_personas_y_tipos.sql`
 - `20261025110000_crear_productos_y_tipos.sql`
 - `20261026100000_productos_sin_decimales.sql`
+- `20261027010000_habilitar_rls_tablas_administrativas.sql`
+
+La última migración habilita Row-Level Security (RLS) en `personas`, `tipos_personas`, `personas_tipos`, `productos`, `tipos_productos` y `productos_tipos`. No se crean políticas públicas: la web nunca consulta Supabase directamente y toda operación pasa por la API ASP.NET Core, cuya conexión de servidor puede operar con RLS habilitado.
 
 La web nunca se conecta directamente a Supabase: consume la API ASP.NET Core, que usa Entity Framework Core y PostgreSQL.
