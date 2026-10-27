@@ -17,14 +17,38 @@ public partial class Login
     // Evita que el usuario presione Ingresar varias veces mientras llega la respuesta.
     private bool enviando;
 
+    // Evita mostrar el formulario mientras se confirma si ya existe una sesión válida.
+    private bool cargandoSesion = true;
+
+    // El foco se aplica una vez que el formulario ya fue renderizado.
+    private bool enfocarCampoUsuario;
+
+    /// <summary>
+    /// Si la persona ya tiene una sesión válida, evita mostrar Login y la lleva al inicio.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        if (await Autenticacion.ValidarSesionAsync())
+        {
+            Navegacion.NavigateTo("inicio", forceLoad: true);
+            return;
+        }
+
+        cargandoSesion = false;
+        enfocarCampoUsuario = true;
+    }
+
     /// <summary>
     /// Se ejecuta después de que Blazor dibuja la página por primera vez.
     /// Coloca el foco en Usuario para que se pueda escribir sin tocar el campo.
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool primerRender)
     {
-        if (primerRender)
+        if (enfocarCampoUsuario)
+        {
             await campoUsuario.FocusAsync();
+            enfocarCampoUsuario = false;
+        }
     }
 
     /// <summary>
