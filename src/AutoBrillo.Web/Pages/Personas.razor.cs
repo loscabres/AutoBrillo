@@ -53,7 +53,10 @@ public partial class Personas
 
     private async Task CambiarEstado(PersonaDto persona)
     {
-        var error = await Gestion.CambiarEstadoPersonaAsync(persona.Id_Personas, !persona.Activo);
+        var nuevoEstado = !persona.Activo;
+        var accion = nuevoEstado ? "activar" : "desactivar";
+        if (!await Alertas.ConfirmarCambioEstadoAsync("persona", accion, persona.Nombre)) return;
+        var error = await Gestion.CambiarEstadoPersonaAsync(persona.Id_Personas, nuevoEstado);
         if (error is not null) { await Alertas.MostrarErrorGeneralAsync("No se pudo cambiar el estado", error); return; }
         await CargarAsync();
     }

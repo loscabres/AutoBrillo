@@ -1,6 +1,7 @@
 using AutoBrillo.Api.Contratos;
 using AutoBrillo.Model.Entidades;
 using AutoBrillo.Repository.Repositorios;
+using AutoBrillo.Api.Validaciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,6 +69,7 @@ public class ProductosController(IProductoRepository productos, ITipoProductoRep
         var descripcion = request.Descripcion?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(descripcion)) return (BadRequest(new { mensaje = "La descripción es obligatoria." }), null);
         if (request.PrecioDeCosto < 0 || request.PrecioDeVenta < 0 || request.StockActual < 0) return (BadRequest(new { mensaje = "Precios y stock no pueden ser negativos." }), null);
+        if (!ValidadorProducto.TieneValoresEnteros(request.PrecioDeCosto, request.PrecioDeVenta, request.StockActual)) return (BadRequest(new { mensaje = "Precios y stock deben ser números enteros en guaraníes." }), null);
         if (await productos.ExisteDescripcionAsync(descripcion, excluirId, cancellationToken)) return (Conflict(new { mensaje = "Ya existe un producto con esa descripción." }), null);
         var ids = request.Id_Tipos_Productos.Distinct().ToList();
         if (ids.Count == 0) return (BadRequest(new { mensaje = "Seleccioná al menos un tipo de producto." }), null);

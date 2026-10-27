@@ -94,12 +94,12 @@ Ejemplo de creación:
 |---|---|---|---|
 | `Id_Productos` | entero | PK, autoincremental | Identificador único del producto o servicio. |
 | `Descripcion` | varchar(150) | obligatorio, único | Nombre o descripción del registro. |
-| `PrecioDeCosto` | numeric(18,2) | obligatorio, no negativo | Costo de adquisición o prestación. |
-| `PrecioDeVenta` | numeric(18,2) | obligatorio, no negativo | Precio que se cobra al cliente. |
+| `PrecioDeCosto` | numeric(18,0) | obligatorio, no negativo | Costo de adquisición o prestación en guaraníes enteros. |
+| `PrecioDeVenta` | numeric(18,0) | obligatorio, no negativo | Precio que se cobra al cliente, en guaraníes enteros. |
 | `Activo` | boolean | obligatorio, valor inicial `true` | Permite activar o desactivar el producto sin eliminarlo. |
-| `StockActual` | numeric(18,2) | obligatorio, valor inicial `0`, no negativo | Existencia actual disponible. |
+| `StockActual` | numeric(18,0) | obligatorio, valor inicial `0`, no negativo | Existencia actual disponible, sin fracciones. |
 
-La interfaz solicita costo, venta y stock como números enteros. La base admite dos decimales para conservar flexibilidad si el negocio lo requiere en el futuro.
+La interfaz y la API aceptan únicamente valores enteros. La base de datos utiliza `numeric(18,0)` para reflejar que los importes se manejan exclusivamente en guaraníes, sin decimales.
 
 ### Tabla `tipos_productos`
 
@@ -160,5 +160,6 @@ Las tablas están definidas en migraciones versionadas, aplicadas en el proyecto
 
 - `20261025100000_crear_personas_y_tipos.sql`
 - `20261025110000_crear_productos_y_tipos.sql`
+- `20261026100000_productos_sin_decimales.sql`
 
 La web nunca se conecta directamente a Supabase: consume la API ASP.NET Core, que usa Entity Framework Core y PostgreSQL.

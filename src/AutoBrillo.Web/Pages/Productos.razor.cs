@@ -38,7 +38,15 @@ public partial class Productos
     }
 
     private void EditarProducto(ProductoDto producto) => edicion = new ProductoEdicionDto { Id_Productos = producto.Id_Productos, Descripcion = producto.Descripcion, PrecioDeCosto = producto.PrecioDeCosto, PrecioDeVenta = producto.PrecioDeVenta, StockActual = producto.StockActual, Id_Tipos_Productos = [.. producto.Id_Tipos_Productos] };
-    private async Task CambiarEstado(ProductoDto producto) { var error = await Gestion.CambiarEstadoProductoAsync(producto.Id_Productos, !producto.Activo); if (error is not null) { await Alertas.MostrarErrorGeneralAsync("No se pudo cambiar el estado", error); return; } await CargarAsync(); }
+    private async Task CambiarEstado(ProductoDto producto)
+    {
+        var nuevoEstado = !producto.Activo;
+        var accion = nuevoEstado ? "activar" : "desactivar";
+        if (!await Alertas.ConfirmarCambioEstadoAsync("producto", accion, producto.Descripcion)) return;
+        var error = await Gestion.CambiarEstadoProductoAsync(producto.Id_Productos, nuevoEstado);
+        if (error is not null) { await Alertas.MostrarErrorGeneralAsync("No se pudo cambiar el estado", error); return; }
+        await CargarAsync();
+    }
     private async Task EliminarProducto(ProductoDto producto) { if (!await Alertas.ConfirmarEliminarUsuarioAsync(producto.Descripcion)) return; var error = await Gestion.EliminarProductoAsync(producto.Id_Productos); if (error is not null) { await Alertas.MostrarErrorGeneralAsync("No se pudo eliminar el producto", error); return; } await CargarAsync(); }
 
     private async Task GuardarTipo()
