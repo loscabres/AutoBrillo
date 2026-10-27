@@ -14,11 +14,9 @@ AutoBrillo.Web → API HTTP/JSON → Repository → Model → PostgreSQL
 
 Contiene las entidades del sistema. No conoce la base de datos ni las pantallas.
 
-Actualmente incluye la entidad `Usuario`:
+Incluye entidades para `Usuario`, `Rol`, `Persona`, `TipoPersona`, `Producto` y `TipoProducto`.
 
-- `Id_Usuarios`: identificador entero autoincremental.
-- `Nombre`: nombre único del usuario.
-- `Password`: hash BCrypt de la contraseña.
+Las relaciones N:M entre personas/tipos y productos/tipos se configuran mediante tablas puente en la capa Repository. Los campos y reglas del modelo administrativo se detallan en [Personas, clientes y productos](personas-y-productos.md).
 
 ### 2. AutoBrillo.Repository
 
@@ -26,9 +24,8 @@ Es la capa que se comunica con PostgreSQL usando Entity Framework Core.
 
 Componentes principales:
 
-- `Datos/AutoBrilloDbContext.cs`: configura la tabla `usuarios`.
-- `Repositorios/IUserRepository.cs`: contrato simple para usuarios.
-- `Repositorios/RepositorioUsuarios.cs`: consultas y guardado de usuarios.
+- `Datos/AutoBrilloDbContext.cs`: configura usuarios, roles, personas, productos, catálogos de tipos y relaciones N:M.
+- Repositorios e interfaces para usuarios, roles, personas, tipos de persona, productos y tipos de producto.
 - `Seguridad/PasswordHasher.cs`: genera y verifica hashes BCrypt.
 
 Esta separación permite reemplazar PostgreSQL por MariaDB en el futuro cambiando principalmente el proveedor de Entity Framework Core, sin modificar la web.
@@ -51,13 +48,16 @@ La API no envía hashes de contraseñas al cliente.
 
 Es una aplicación Blazor WebAssembly. Se ejecuta en el navegador y usa `HttpClient` para comunicarse con la API.
 
-Pantallas actuales:
+Pantallas administrativas relevantes:
 
 - `Login.razor`: formulario de acceso.
 - `Inicio.razor`: pantalla inicial protegida.
-- `Shared/MainLayout.razor`: barra superior y botón de cerrar sesión.
+- `Usuarios.razor` y `Roles.razor`: administración de accesos.
+- `Personas.razor`: registro de clientes, funcionarios y proveedores.
+- `Productos.razor`: registro de productos, servicios e insumos.
+- `Shared/MainLayout.razor`: navegación y cierre de sesión.
 
-El servicio `ServicioAutenticacion` guarda el token y el nombre de usuario en `localStorage`, valida la sesión llamando a `GET /api/auth/me` y borra los datos al cerrar sesión.
+Las pantallas administrativas validan la sesión y el rol `Administrador` antes de habilitar su contenido.
 
 ## Flujo de inicio de sesión
 

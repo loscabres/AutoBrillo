@@ -8,6 +8,8 @@ https://autobrillo-api.179.199.139.243.nip.io/
 
 Todas las respuestas usan JSON.
 
+> Los endpoints administrativos de Personas, Productos y sus tipos están documentados junto con sus tablas y campos en [Personas, clientes y productos](personas-y-productos.md).
+
 ## Estado del servicio
 
 ### `GET /health`
